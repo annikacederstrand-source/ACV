@@ -5,31 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RAPID GeoPermit — New Project Wizard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0c10;
-    --surface: #111318;
-    --surface2: #181b22;
-    --surface3: #1e2128;
-    --border: #22262f;
-    --border2: #2e3340;
-    --accent: #e8562a;
-    --accent2: #f0934a;
-    --accent-glow: rgba(232,86,42,0.15);
-    --green: #3ecf8e;
-    --green-dim: rgba(62,207,142,0.12);
-    --yellow: #f5c842;
-    --yellow-dim: rgba(245,200,66,0.1);
-    --blue: #4a9eff;
-    --blue-dim: rgba(74,158,255,0.1);
-    --red-dim: rgba(232,86,42,0.1);
-    --text: #e8eaf0;
-    --text-dim: #8b90a0;
-    --text-faint: #4a4f5e;
-    --mono: 'DM Mono', monospace;
-    --sans: 'DM Sans', sans-serif;
-    --display: 'Syne', sans-serif;
+    --bg:        #0c0b0a;
+    --surface:   #131211;
+    --surface2:  #1a1917;
+    --surface3:  #211f1d;
+    --border:    #272422;
+    --border2:   #37332e;
+    --fervo:     #ff5500;
+    --fervo2:    #ff7433;
+    --fervo3:    #ffaa66;
+    --fervo4:    #ffd4a8;
+    --fervo-glow:  rgba(255,85,0,0.18);
+    --fervo-glow2: rgba(255,85,0,0.08);
+    --green:     #3dd68c;
+    --green-dim: rgba(61,214,140,0.11);
+    --amber:     #f5a623;
+    --amber-dim: rgba(245,166,35,0.10);
+    --sky:       #5badff;
+    --sky-dim:   rgba(91,173,255,0.10);
+    --red-dim:   rgba(255,85,0,0.10);
+    --text:      #ede9e3;
+    --text-dim:  #8a8580;
+    --text-faint:#48443f;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'Barlow', sans-serif;
+    --display: 'Barlow Condensed', sans-serif;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,55 +45,44 @@
   }
 
   body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px),
-      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px);
-    pointer-events: none; z-index: 0;
+    content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 70% 50% at 5% 95%,  rgba(255,85,0,0.09)  0%, transparent 65%),
+      radial-gradient(ellipse 50% 35% at 95% 5%,  rgba(255,116,51,0.06) 0%, transparent 60%),
+      repeating-linear-gradient(0deg,  transparent, transparent 59px, rgba(255,255,255,0.013) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.013) 60px);
   }
 
   /* ── NAV ── */
   nav {
     position: sticky; top: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 32px;
-    background: rgba(10,12,16,0.92);
-    backdrop-filter: blur(12px);
+    padding: 0 32px; height: 60px;
+    background: rgba(12,11,10,0.94); backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
   }
-
-  .nav-brand { display: flex; align-items: center; gap: 12px; }
-
+  .nav-brand { display: flex; align-items: center; gap: 14px; }
   .nav-logo {
-    width: 32px; height: 32px;
-    background: var(--accent);
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono); font-size: 11px; color: white;
+    width: 34px; height: 34px; background: var(--fervo);
+    border-radius: 5px; display: flex; align-items: center; justify-content: center;
+    font-family: var(--display); font-size: 15px; font-weight: 800; color: white;
+    box-shadow: 0 0 16px rgba(255,85,0,0.45);
   }
-
-  .nav-title { font-family: var(--display); font-size: 16px; font-weight: 700; }
-  .nav-title span { color: var(--accent); }
-  .nav-meta { font-family: var(--mono); font-size: 10px; color: var(--text-faint); letter-spacing: 0.08em; text-transform: uppercase; }
-
-  .nav-actions { display: flex; align-items: center; gap: 12px; }
-
-  .nav-link {
-    font-family: var(--mono); font-size: 11px; color: var(--text-dim);
-    text-decoration: none; letter-spacing: 0.05em;
-    padding: 4px 8px; border-radius: 4px;
-    transition: color .2s, background .2s;
-  }
+  .nav-wordmark { display: flex; flex-direction: column; gap: 1px; }
+  .nav-title { font-family: var(--display); font-size: 17px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
+  .nav-title .highlight { color: var(--fervo); }
+  .nav-sub { font-family: var(--mono); font-size: 9px; color: var(--text-faint); letter-spacing: 0.12em; text-transform: uppercase; }
+  .nav-actions { display: flex; align-items: center; gap: 4px; }
+  .nav-link { font-family: var(--mono); font-size: 11px; color: var(--text-dim); text-decoration: none; letter-spacing: 0.05em; padding: 6px 10px; border-radius: 4px; transition: color .2s, background .2s; text-transform: uppercase; }
   .nav-link:hover { color: var(--text); background: var(--surface2); }
-  .nav-link.active { color: var(--accent); }
+  .nav-link.active { color: var(--fervo); }
+  .nav-divider { width: 1px; height: 20px; background: var(--border2); margin: 0 4px; }
 
   /* ── PAGE LAYOUT ── */
   .page-wrap {
     position: relative; z-index: 1;
-    display: grid;
-    grid-template-columns: 380px 1fr;
-    min-height: calc(100vh - 65px);
+    display: grid; grid-template-columns: 390px 1fr;
+    min-height: calc(100vh - 60px);
   }
 
   /* ── FORM PANEL ── */
@@ -98,408 +90,207 @@
     border-right: 1px solid var(--border);
     display: flex; flex-direction: column;
     overflow-y: auto;
-    position: sticky; top: 65px;
-    max-height: calc(100vh - 65px);
+    position: sticky; top: 60px;
+    max-height: calc(100vh - 60px);
+    background: var(--surface);
   }
 
   .form-header {
-    padding: 28px 28px 20px;
+    padding: 28px 28px 22px;
     border-bottom: 1px solid var(--border);
+    border-top: 3px solid var(--fervo);
   }
 
-  .form-step-indicator {
-    display: flex; gap: 6px; margin-bottom: 16px;
-  }
+  .step-bar { display: flex; gap: 4px; margin-bottom: 18px; }
+  .step-seg { height: 3px; border-radius: 2px; flex: 1; background: var(--border2); transition: background .3s; }
+  .step-seg.done { background: var(--fervo); }
 
-  .step-dot {
-    height: 3px; border-radius: 2px;
-    flex: 1;
-    background: var(--border2);
-    transition: background .3s;
+  .form-header-eyebrow {
+    font-family: var(--mono); font-size: 10px; color: var(--fervo);
+    letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 8px;
   }
-  .step-dot.done { background: var(--accent); }
+  .form-header-eyebrow::before { content: ''; display: inline-block; width: 16px; height: 2px; background: var(--fervo); }
 
-  .form-header-title {
-    font-family: var(--display); font-size: 20px; font-weight: 800;
-    line-height: 1.2; margin-bottom: 6px;
-  }
+  .form-header-title { font-family: var(--display); font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; margin-bottom: 6px; }
+  .form-header-sub { font-size: 12px; font-weight: 300; color: var(--text-dim); line-height: 1.55; }
 
-  .form-header-sub {
-    font-size: 12px; color: var(--text-dim); line-height: 1.5;
-  }
-
-  .form-body {
-    padding: 24px 28px;
-    display: flex; flex-direction: column; gap: 20px;
-    flex: 1; overflow-y: auto;
-  }
+  .form-body { padding: 22px 28px; display: flex; flex-direction: column; gap: 18px; flex: 1; overflow-y: auto; }
 
   .field-group { display: flex; flex-direction: column; gap: 6px; }
-
-  .field-label {
-    font-family: var(--mono);
-    font-size: 10px; font-weight: 500;
-    color: var(--text-dim);
-    letter-spacing: 0.08em; text-transform: uppercase;
-    display: flex; align-items: center; gap: 6px;
-  }
-
-  .field-required { color: var(--accent); }
-
-  .field-hint {
-    font-size: 11px; color: var(--text-faint);
-    line-height: 1.4;
-  }
+  .field-label { font-family: var(--mono); font-size: 10px; font-weight: 500; color: var(--text-dim); letter-spacing: 0.09em; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+  .field-req { color: var(--fervo); }
+  .field-hint { font-size: 11px; color: var(--text-faint); line-height: 1.4; font-style: italic; }
 
   .field-input, .field-select, .field-textarea {
-    background: var(--surface2);
-    border: 1px solid var(--border2);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: var(--sans);
-    font-size: 13px;
-    padding: 10px 14px;
-    outline: none;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 5px; color: var(--text);
+    font-family: var(--sans); font-size: 13px;
+    padding: 9px 13px; outline: none; width: 100%;
     transition: border-color .2s, box-shadow .2s;
-    width: 100%;
   }
   .field-input:focus, .field-select:focus, .field-textarea:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 0 3px var(--accent-glow);
+    border-color: var(--fervo); box-shadow: 0 0 0 3px var(--fervo-glow2);
   }
-  .field-select option { background: #1e2128; }
+  .field-select option { background: #1a1917; }
   .field-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
-  /* Toggle chips */
-  .chip-group { display: flex; flex-wrap: wrap; gap: 6px; }
-
+  .chip-group { display: flex; flex-wrap: wrap; gap: 5px; }
   .chip {
-    padding: 6px 14px;
-    border-radius: 20px;
-    border: 1px solid var(--border2);
-    background: transparent;
-    color: var(--text-dim);
-    font-family: var(--mono);
-    font-size: 10px; font-weight: 500;
-    letter-spacing: 0.03em;
-    cursor: pointer;
-    transition: all .2s;
+    padding: 5px 13px; border-radius: 3px;
+    border: 1px solid var(--border2); background: transparent;
+    color: var(--text-dim); font-family: var(--mono);
+    font-size: 10px; font-weight: 500; letter-spacing: 0.04em;
+    text-transform: uppercase; cursor: pointer; transition: all .15s;
   }
-  .chip:hover { border-color: var(--accent); color: var(--accent); }
-  .chip.selected {
-    background: var(--accent-glow);
-    border-color: var(--accent);
-    color: var(--accent);
-  }
+  .chip:hover { border-color: var(--fervo); color: var(--fervo); }
+  .chip.selected { background: var(--fervo-glow); border-color: var(--fervo); color: var(--fervo); }
 
-  /* Checkbox rows */
-  .check-row {
-    display: flex; align-items: center; gap: 10px;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-  }
+  .check-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
   .check-row:last-child { border-bottom: none; }
-
-  .check-box {
-    width: 16px; height: 16px;
-    border: 1px solid var(--border2);
-    border-radius: 4px;
-    background: var(--surface2);
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    transition: all .2s;
-  }
-  .check-row.checked .check-box {
-    background: var(--accent);
-    border-color: var(--accent);
-  }
-  .check-row.checked .check-box::after {
-    content: '✓'; color: white; font-size: 10px;
-  }
-
+  .check-box { width: 15px; height: 15px; border: 1px solid var(--border2); border-radius: 3px; background: var(--surface2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+  .check-row.checked .check-box { background: var(--fervo); border-color: var(--fervo); }
+  .check-row.checked .check-box::after { content: '✓'; color: white; font-size: 9px; font-weight: 700; }
   .check-label { font-size: 12px; }
 
-  .form-footer {
-    padding: 20px 28px;
-    border-top: 1px solid var(--border);
-  }
+  .form-footer { padding: 18px 28px; border-top: 1px solid var(--border); }
 
   .btn-generate {
-    width: 100%;
-    background: var(--accent);
-    color: white; border: none; cursor: pointer;
-    font-family: var(--display);
-    font-size: 14px; font-weight: 700;
-    padding: 14px;
-    border-radius: 8px;
-    transition: background .2s, transform .1s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    letter-spacing: 0.02em;
+    width: 100%; background: var(--fervo); color: white;
+    border: none; cursor: pointer;
+    font-family: var(--display); font-size: 15px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 14px; border-radius: 5px;
+    transition: background .15s, transform .1s, box-shadow .2s;
+    display: flex; align-items: center; justify-content: center; gap: 9px;
+    box-shadow: 0 0 24px rgba(255,85,0,0.3);
   }
-  .btn-generate:hover { background: #d44820; transform: translateY(-1px); }
+  .btn-generate:hover { background: var(--fervo2); transform: translateY(-1px); box-shadow: 0 0 32px rgba(255,85,0,0.5); }
   .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-  .btn-generate .spinner {
-    width: 16px; height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin .7s linear infinite;
-    display: none;
-  }
+  .btn-generate .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
   .btn-generate.loading .spinner { display: block; }
   .btn-generate.loading .btn-text { display: none; }
-
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* ── RESULTS PANEL ── */
-  .results-panel {
-    padding: 32px;
-    overflow-y: auto;
-  }
+  .results-panel { padding: 36px; overflow-y: auto; }
 
-  /* Empty State */
-  .empty-state {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    min-height: 60vh; text-align: center;
-    gap: 16px;
-  }
+  /* Empty state */
+  .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 60vh; text-align: center; gap: 20px; }
 
-  .empty-diagram {
-    width: 200px; height: 160px;
-    position: relative;
-  }
-
-  .empty-hex {
-    position: absolute;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+  .empty-glyph {
+    width: 96px; height: 96px; border-radius: 50%;
+    border: 2px solid var(--border2);
     display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    transition: all .3s;
+    font-size: 40px;
+    position: relative;
+    animation: heatpulse 3s ease-in-out infinite;
   }
-
-  .empty-hex:hover { border-color: var(--accent); transform: scale(1.05); }
-
-  .empty-hex-1 { width: 70px; height: 70px; top: 20px; left: 65px; animation: pulse 3s ease-in-out infinite; }
-  .empty-hex-2 { width: 50px; height: 50px; top: 50px; left: 10px; animation: pulse 3s ease-in-out .5s infinite; }
-  .empty-hex-3 { width: 50px; height: 50px; top: 50px; right: 10px; animation: pulse 3s ease-in-out 1s infinite; }
-  .empty-hex-4 { width: 40px; height: 40px; bottom: 5px; left: 40px; animation: pulse 3s ease-in-out 1.5s infinite; }
-  .empty-hex-5 { width: 40px; height: 40px; bottom: 5px; right: 40px; animation: pulse 3s ease-in-out 2s infinite; }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.9; }
+  .empty-glyph::before {
+    content: ''; position: absolute; inset: -8px; border-radius: 50%;
+    border: 1px solid rgba(255,85,0,0.15);
+    animation: heatpulse 3s ease-in-out infinite reverse;
   }
+  @keyframes heatpulse { 0%,100% { box-shadow: 0 0 20px rgba(255,85,0,0.1); } 50% { box-shadow: 0 0 40px rgba(255,85,0,0.25); } }
 
-  .empty-title {
-    font-family: var(--display); font-size: 22px; font-weight: 800;
-    margin-top: 8px;
-  }
+  .empty-title { font-family: var(--display); font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+  .empty-sub { font-size: 13px; font-weight: 300; color: var(--text-dim); max-width: 380px; line-height: 1.65; }
 
-  .empty-sub { font-size: 13px; color: var(--text-dim); max-width: 360px; line-height: 1.6; }
+  /* Results header */
+  .results-header { margin-bottom: 28px; padding-bottom: 22px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; }
+  .results-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--fervo); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 7px; display: flex; align-items: center; gap: 8px; }
+  .results-eyebrow::before { content: ''; display: inline-block; width: 16px; height: 2px; background: var(--fervo); }
+  .results-title { font-family: var(--display); font-size: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.1; }
+  .results-meta { font-size: 12px; font-weight: 300; color: var(--text-dim); margin-top: 6px; }
 
-  /* ── RESULTS ── */
-  .results-header {
-    margin-bottom: 28px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex; align-items: flex-start; justify-content: space-between;
-    gap: 20px;
-  }
-
-  .results-label {
-    font-family: var(--mono); font-size: 10px; color: var(--accent);
-    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px;
-  }
-
-  .results-title {
-    font-family: var(--display); font-size: 26px; font-weight: 800; line-height: 1.2;
-  }
-
-  .results-meta {
-    font-size: 12px; color: var(--text-dim); margin-top: 6px; line-height: 1.6;
-  }
-
-  .results-summary {
-    display: flex; gap: 12px; flex-shrink: 0;
-  }
-
-  .summary-pill {
-    padding: 8px 16px; border-radius: 8px;
-    font-family: var(--mono); font-size: 11px; font-weight: 500;
-    text-align: center;
-  }
-  .pill-total { background: var(--surface); border: 1px solid var(--border); }
-  .pill-critical { background: var(--red-dim); border: 1px solid var(--accent); color: var(--accent); }
-  .pill-timeline { background: var(--yellow-dim); border: 1px solid rgba(245,200,66,0.3); color: var(--yellow); }
-
-  .summary-pill div:first-child { font-size: 20px; font-weight: 700; line-height: 1; }
-  .summary-pill div:last-child { font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 3px; opacity: 0.8; }
+  .results-summary { display: flex; gap: 3px; flex-shrink: 0; }
+  .summary-pill { padding: 10px 16px; text-align: center; }
+  .summary-pill:first-child { border-radius: 6px 0 0 6px; }
+  .summary-pill:last-child  { border-radius: 0 6px 6px 0; }
+  .pill-total    { background: var(--surface); border: 1px solid var(--border); }
+  .pill-critical { background: var(--red-dim);   border: 1px solid rgba(255,85,0,0.3);   color: var(--fervo2); }
+  .pill-timeline { background: var(--amber-dim); border: 1px solid rgba(245,166,35,0.3); color: var(--amber); }
+  .summary-pill div:first-child { font-family: var(--display); font-size: 22px; font-weight: 800; line-height: 1; }
+  .summary-pill div:last-child  { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; opacity: .8; }
 
   /* AI narrative */
-  .ai-narrative {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 10px 10px 0;
-    padding: 20px 24px;
-    margin-bottom: 28px;
-  }
+  .ai-narrative { background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--fervo); border-radius: 0 6px 6px 0; padding: 18px 22px; margin-bottom: 26px; }
+  .ai-label { font-family: var(--mono); font-size: 9px; color: var(--fervo); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+  .ai-text { font-size: 13px; font-weight: 300; color: var(--text-dim); line-height: 1.75; }
 
-  .ai-label {
-    font-family: var(--mono); font-size: 9px; color: var(--accent);
-    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px;
-  }
+  /* Checklist */
+  .phase-section { margin-bottom: 26px; }
+  .phase-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .phase-section-title { font-family: var(--display); font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
+  .phase-section-title::before { content: ''; display: inline-block; width: 12px; height: 2px; background: var(--fervo); }
+  .phase-count-badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 2px; background: var(--surface); border: 1px solid var(--border); color: var(--text-dim); }
 
-  .ai-text { font-size: 13px; color: var(--text-dim); line-height: 1.7; }
-
-  /* Permit checklist */
-  .phase-section { margin-bottom: 28px; }
-
-  .phase-section-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 12px;
-  }
-
-  .phase-section-title {
-    font-family: var(--display); font-size: 13px; font-weight: 700;
-    letter-spacing: 0.06em; text-transform: uppercase;
-    display: flex; align-items: center; gap: 8px;
-  }
-
-  .phase-section-title span { color: var(--accent); font-size: 10px; }
-
-  .phase-count-badge {
-    font-family: var(--mono); font-size: 10px;
-    padding: 2px 8px; border-radius: 10px;
-    background: var(--surface); border: 1px solid var(--border);
-    color: var(--text-dim);
-  }
-
-  .permit-checklist { display: flex; flex-direction: column; gap: 6px; }
+  .permit-checklist { display: flex; flex-direction: column; gap: 5px; }
 
   .permit-check-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 18px;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 14px;
-    align-items: center;
-    cursor: pointer;
-    transition: border-color .2s, background .2s;
-    position: relative;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; padding: 13px 16px;
+    display: grid; grid-template-columns: auto 1fr auto;
+    gap: 13px; align-items: center; cursor: pointer;
+    transition: border-color .15s, background .15s;
   }
   .permit-check-item:hover { border-color: var(--border2); background: var(--surface2); }
-  .permit-check-item.completed { opacity: 0.6; }
-  .permit-check-item.critical { border-left: 3px solid var(--accent); }
+  .permit-check-item.completed { opacity: 0.55; }
+  .permit-check-item.critical  { border-left: 3px solid var(--fervo); }
 
   .pci-check {
-    width: 20px; height: 20px;
-    border: 2px solid var(--border2);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: all .2s;
-    cursor: pointer;
+    width: 20px; height: 20px; border: 2px solid var(--border2);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all .15s; cursor: pointer;
   }
-  .permit-check-item.completed .pci-check {
-    background: var(--green); border-color: var(--green);
-  }
-  .permit-check-item.completed .pci-check::after {
-    content: '✓'; color: #0a0c10; font-size: 10px; font-weight: 700;
-  }
+  .permit-check-item.completed .pci-check { background: var(--green); border-color: var(--green); }
+  .permit-check-item.completed .pci-check::after { content: '✓'; color: #0c0b0a; font-size: 10px; font-weight: 700; }
 
-  .pci-info {}
-
-  .pci-name {
-    font-family: var(--display); font-size: 13px; font-weight: 600;
-    margin-bottom: 2px;
-  }
+  .pci-name { font-family: var(--display); font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 2px; }
   .permit-check-item.completed .pci-name { text-decoration: line-through; }
-
   .pci-agency { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
-
-  .pci-right { text-align: right; flex-shrink: 0; }
-
-  .pci-timeline {
-    font-family: var(--mono); font-size: 10px; color: var(--text-dim);
-    white-space: nowrap;
-  }
-
+  .pci-right  { text-align: right; flex-shrink: 0; }
+  .pci-timeline { font-family: var(--mono); font-size: 10px; color: var(--text-dim); white-space: nowrap; }
   .pci-tags { display: flex; gap: 4px; margin-top: 4px; justify-content: flex-end; flex-wrap: wrap; }
+  .pci-tag { font-family: var(--mono); font-size: 9px; padding: 2px 7px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .tag-f { background: var(--sky-dim);   color: var(--sky);   border: 1px solid rgba(91,173,255,.2); }
+  .tag-s { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,214,140,.2); }
+  .tag-e { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.2); }
+  .tag-crit { background: var(--red-dim); color: var(--fervo2); border: 1px solid rgba(255,85,0,.22); }
 
-  .pci-tag {
-    font-family: var(--mono); font-size: 9px;
-    padding: 2px 7px; border-radius: 10px;
-  }
-  .tag-f { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(74,158,255,0.2); }
-  .tag-s { background: var(--green-dim); color: var(--green); border: 1px solid rgba(62,207,142,0.2); }
-  .tag-e { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,200,66,0.2); }
-  .tag-crit { background: var(--red-dim); color: var(--accent); border: 1px solid rgba(232,86,42,0.25); }
-
-  /* Critical path notice */
+  /* Alerts */
   .critical-notice {
-    background: var(--red-dim);
-    border: 1px solid rgba(232,86,42,0.3);
-    border-radius: 8px;
-    padding: 14px 18px;
-    margin-bottom: 24px;
-    display: flex; align-items: flex-start; gap: 12px;
+    background: var(--red-dim); border: 1px solid rgba(255,85,0,0.3);
+    border-radius: 5px; padding: 13px 16px; margin-bottom: 22px;
+    display: flex; align-items: flex-start; gap: 11px;
   }
-
-  .critical-notice-icon { font-size: 18px; flex-shrink: 0; }
-
+  .critical-notice-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
   .critical-notice-text { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
-  .critical-notice-text strong { color: var(--accent); }
+  .critical-notice-text strong { color: var(--fervo2); }
 
-  /* Rapid link */
-  .rapid-ref {
-    margin-top: 32px;
-    padding: 20px 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  }
+  /* RAPID ref footer */
+  .rapid-ref { margin-top: 32px; padding: 18px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .rapid-ref-title { font-family: var(--display); font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
+  .rapid-ref-sub { font-size: 12px; font-weight: 300; color: var(--text-dim); }
+  .rapid-ref-btn { background: var(--fervo); border: none; color: white; text-decoration: none; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 18px; border-radius: 4px; white-space: nowrap; transition: background .15s, box-shadow .2s; flex-shrink: 0; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 16px rgba(255,85,0,0.25); }
+  .rapid-ref-btn:hover { background: var(--fervo2); box-shadow: 0 0 24px rgba(255,85,0,0.4); }
 
-  .rapid-ref-info {}
-  .rapid-ref-title { font-family: var(--display); font-size: 14px; font-weight: 700; margin-bottom: 4px; }
-  .rapid-ref-sub { font-size: 12px; color: var(--text-dim); }
+  /* Skeleton loader */
+  .skel { background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%); background-size: 200%; animation: shimmer 1.5s infinite; border-radius: 4px; }
+  .skel-line { height: 12px; margin-bottom: 8px; }
+  .skel-short { width: 60%; }
+  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-  .rapid-ref-btn {
-    background: var(--surface2); border: 1px solid var(--border2);
-    color: var(--text); text-decoration: none;
-    font-family: var(--mono); font-size: 11px;
-    padding: 10px 18px; border-radius: 6px;
-    white-space: nowrap;
-    transition: all .2s;
-    flex-shrink: 0;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .rapid-ref-btn:hover { border-color: var(--accent); color: var(--accent); }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  .fade-in { animation: fadeIn .4s ease forwards; }
 
-  /* ── RESPONSIVE ── */
+  /* Responsive */
   @media (max-width: 900px) {
     .page-wrap { grid-template-columns: 1fr; }
     .form-panel { position: static; max-height: none; }
     .results-header { flex-direction: column; }
     .results-summary { flex-direction: row; }
   }
-
-  /* ── TYPING ANIMATION ── */
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-  .fade-in { animation: fadeIn .4s ease forwards; }
-
-  /* Loading skeleton */
-  .skel { background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%); background-size: 200%; animation: shimmer 1.5s infinite; border-radius: 6px; }
-  @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-  .skel-line { height: 12px; margin-bottom: 8px; }
-  .skel-short { width: 60%; }
 </style>
 </head>
 <body>
@@ -507,46 +298,45 @@
 <!-- NAV -->
 <nav>
   <div class="nav-brand">
-    <div class="nav-logo">G</div>
-    <div>
-      <div class="nav-title">RAPID <span>GeoPermit</span></div>
-      <div class="nav-meta">Geothermal Regulatory Intelligence</div>
+    <div class="nav-logo">F</div>
+    <div class="nav-wordmark">
+      <div class="nav-title">RAPID <span class="highlight">GeoPermit</span></div>
+      <div class="nav-sub">Fervo Energy · Regulatory Intelligence</div>
     </div>
   </div>
   <div class="nav-actions">
     <a href="rapid-dashboard.html" class="nav-link">← Dashboard</a>
+    <div class="nav-divider"></div>
     <a href="#" class="nav-link active">New Project</a>
     <a href="https://openei.org/wiki/RAPID/Geothermal" target="_blank" class="nav-link">RAPID ↗</a>
   </div>
 </nav>
 
-<!-- PAGE -->
 <div class="page-wrap">
 
   <!-- FORM PANEL -->
   <div class="form-panel">
     <div class="form-header">
-      <div class="form-step-indicator">
-        <div class="step-dot done" id="step1"></div>
-        <div class="step-dot" id="step2"></div>
-        <div class="step-dot" id="step3"></div>
-        <div class="step-dot" id="step4"></div>
+      <div class="step-bar">
+        <div class="step-seg done"  id="step1"></div>
+        <div class="step-seg" id="step2"></div>
+        <div class="step-seg" id="step3"></div>
+        <div class="step-seg" id="step4"></div>
       </div>
-      <div class="form-header-title">New Project<br>Permit Wizard</div>
-      <div class="form-header-sub">Input project details to generate a tailored RAPID-based permit checklist.</div>
+      <div class="form-header-eyebrow">New Project</div>
+      <div class="form-header-title">Permit Wizard</div>
+      <div class="form-header-sub">Input project details to generate a tailored RAPID-based permit checklist for your geothermal development.</div>
     </div>
 
     <div class="form-body">
 
-      <!-- Project Name -->
       <div class="field-group">
-        <label class="field-label">Project Name <span class="field-required">*</span></label>
-        <input id="fName" class="field-input" type="text" placeholder="e.g. Fervo Cape Station 2 — Well Pad C" oninput="updateSteps()">
+        <label class="field-label">Project Name <span class="field-req">*</span></label>
+        <input id="fName" class="field-input" type="text" placeholder="e.g. Cape Station — Well Pad D" oninput="updateSteps()">
       </div>
 
-      <!-- State -->
       <div class="field-group">
-        <label class="field-label">State / Jurisdiction <span class="field-required">*</span></label>
+        <label class="field-label">State / Jurisdiction <span class="field-req">*</span></label>
         <select id="fState" class="field-select" onchange="updateSteps()">
           <option value="">Select state...</option>
           <option value="Nevada">Nevada (NV)</option>
@@ -562,51 +352,46 @@
         </select>
       </div>
 
-      <!-- Land Type -->
       <div class="field-group">
-        <label class="field-label">Surface Land Ownership <span class="field-required">*</span></label>
+        <label class="field-label">Surface Land Ownership <span class="field-req">*</span></label>
         <div class="chip-group" id="landTypeGroup">
-          <div class="chip" onclick="toggleChip(this, 'landType')">BLM Federal</div>
-          <div class="chip" onclick="toggleChip(this, 'landType')">USFS Federal</div>
-          <div class="chip" onclick="toggleChip(this, 'landType')">State Land</div>
-          <div class="chip" onclick="toggleChip(this, 'landType')">Private</div>
-          <div class="chip" onclick="toggleChip(this, 'landType')">Tribal</div>
-          <div class="chip" onclick="toggleChip(this, 'landType')">Mixed</div>
+          <div class="chip" onclick="toggleChip(this,'landType')">BLM Federal</div>
+          <div class="chip" onclick="toggleChip(this,'landType')">USFS Federal</div>
+          <div class="chip" onclick="toggleChip(this,'landType')">State Land</div>
+          <div class="chip" onclick="toggleChip(this,'landType')">Private</div>
+          <div class="chip" onclick="toggleChip(this,'landType')">Tribal</div>
+          <div class="chip" onclick="toggleChip(this,'landType')">Mixed</div>
         </div>
       </div>
 
-      <!-- Subsurface Rights -->
       <div class="field-group">
         <label class="field-label">Geothermal Rights Ownership</label>
         <div class="chip-group" id="subsurfGroup">
-          <div class="chip" onclick="toggleChip(this, 'subsurface')">Federal (BLM Lease)</div>
-          <div class="chip" onclick="toggleChip(this, 'subsurface')">State Lease</div>
-          <div class="chip" onclick="toggleChip(this, 'subsurface')">Private / Fee</div>
-          <div class="chip" onclick="toggleChip(this, 'subsurface')">Unknown / TBD</div>
+          <div class="chip" onclick="toggleChip(this,'subsurface')">Federal (BLM Lease)</div>
+          <div class="chip" onclick="toggleChip(this,'subsurface')">State Lease</div>
+          <div class="chip" onclick="toggleChip(this,'subsurface')">Private / Fee</div>
+          <div class="chip" onclick="toggleChip(this,'subsurface')">Unknown / TBD</div>
         </div>
       </div>
 
-      <!-- Project Type -->
       <div class="field-group">
-        <label class="field-label">Project Phase / Type <span class="field-required">*</span></label>
+        <label class="field-label">Project Phase / Type <span class="field-req">*</span></label>
         <div class="chip-group" id="projectTypeGroup">
-          <div class="chip" onclick="toggleChip(this, 'projType')">Exploration Only</div>
-          <div class="chip" onclick="toggleChip(this, 'projType')">Leasing + TGW</div>
-          <div class="chip" onclick="toggleChip(this, 'projType')">Development Drilling</div>
-          <div class="chip" onclick="toggleChip(this, 'projType')">Power Plant</div>
-          <div class="chip" onclick="toggleChip(this, 'projType')">Full Development</div>
-          <div class="chip" onclick="toggleChip(this, 'projType')">EGS / Enhanced</div>
+          <div class="chip" onclick="toggleChip(this,'projType')">Exploration Only</div>
+          <div class="chip" onclick="toggleChip(this,'projType')">Leasing + TGW</div>
+          <div class="chip" onclick="toggleChip(this,'projType')">Development Drilling</div>
+          <div class="chip" onclick="toggleChip(this,'projType')">Power Plant</div>
+          <div class="chip" onclick="toggleChip(this,'projType')">Full Development</div>
+          <div class="chip" onclick="toggleChip(this,'projType')">EGS / Enhanced</div>
         </div>
       </div>
 
-      <!-- MW Capacity -->
       <div class="field-group">
         <label class="field-label">Target Capacity (MW)</label>
         <input id="fMW" class="field-input" type="number" min="1" max="500" placeholder="e.g. 50">
         <span class="field-hint">Affects FERC QF status, state siting requirements, and NEPA scope</span>
       </div>
 
-      <!-- Timeline -->
       <div class="field-group">
         <label class="field-label">Target Start Year</label>
         <select id="fYear" class="field-select">
@@ -619,38 +404,22 @@
         </select>
       </div>
 
-      <!-- Environmental Flags -->
       <div class="field-group">
-        <label class="field-label">Environmental Flags (check all that apply)</label>
+        <label class="field-label">Environmental Flags</label>
         <div id="envFlags">
-          <div class="check-row" onclick="toggleCheck(this)">
-            <div class="check-box"></div><span class="check-label">Wetlands / waterways on or near site</span>
-          </div>
-          <div class="check-row" onclick="toggleCheck(this)">
-            <div class="check-box"></div><span class="check-label">Known cultural / archaeological resources nearby</span>
-          </div>
-          <div class="check-row" onclick="toggleCheck(this)">
-            <div class="check-box"></div><span class="check-label">Threatened or endangered species habitat</span>
-          </div>
-          <div class="check-row" onclick="toggleCheck(this)">
-            <div class="check-box"></div><span class="check-label">Transmission interconnection required</span>
-          </div>
-          <div class="check-row" onclick="toggleCheck(this)">
-            <div class="check-box"></div><span class="check-label">New access road construction needed</span>
-          </div>
-          <div class="check-row" onclick="toggleCheck(this)">
-            <div class="check-box"></div><span class="check-label">Water supply / injection wells required</span>
-          </div>
-          <div class="check-row" onclick="toggleCheck(this)">
-            <div class="check-box"></div><span class="check-label">Proximity to tribal lands (within 5 miles)</span>
-          </div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Wetlands / waterways on or near site</span></div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Known cultural / archaeological resources nearby</span></div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Threatened or endangered species habitat</span></div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Transmission interconnection required</span></div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">New access road construction needed</span></div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Water supply / injection wells required</span></div>
+          <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><span class="check-label">Proximity to tribal lands (within 5 miles)</span></div>
         </div>
       </div>
 
-      <!-- Notes -->
       <div class="field-group">
         <label class="field-label">Additional Project Notes</label>
-        <textarea id="fNotes" class="field-textarea" placeholder="Any specific regulatory concerns, existing lease numbers, co-production with O&G, etc."></textarea>
+        <textarea id="fNotes" class="field-textarea" placeholder="Existing lease numbers, co-production with O&G, specific regulatory concerns..."></textarea>
       </div>
 
     </div>
@@ -665,22 +434,15 @@
 
   <!-- RESULTS PANEL -->
   <div class="results-panel" id="resultsPanel">
-    <!-- Empty state -->
     <div class="empty-state" id="emptyState">
-      <div class="empty-diagram">
-        <div class="empty-hex empty-hex-1">⛏️</div>
-        <div class="empty-hex empty-hex-2">📋</div>
-        <div class="empty-hex empty-hex-3">🗺️</div>
-        <div class="empty-hex empty-hex-4">⚡</div>
-        <div class="empty-hex empty-hex-5">🌡️</div>
-      </div>
+      <div class="empty-glyph">🌋</div>
       <div class="empty-title">Configure your project</div>
-      <div class="empty-sub">Fill in project details on the left. The wizard will generate a tailored federal and state permitting checklist based on RAPID Toolkit data — no guesswork, no missed permits.</div>
+      <div class="empty-sub">Fill in the project details on the left. The wizard will generate a tailored federal and state permitting checklist grounded in RAPID Toolkit data — no guesswork, no missed permits.</div>
     </div>
-
-    <!-- Results (hidden until generated) -->
     <div id="resultsContent" style="display:none"></div>
   </div>
+
+</div>
 
 </div>
 
@@ -1012,10 +774,10 @@ function renderResults(config, permits, narrative, flags) {
       </div>`;
     }).join('')}
 
-    ${flags.length > 0 ? `<div class="critical-notice" style="border-color:rgba(245,200,66,0.3);background:var(--yellow-dim)">
+    ${flags.length > 0 ? `<div class="critical-notice" style="border-color:rgba(245,166,35,0.3);background:var(--amber-dim)">
       <div class="critical-notice-icon">🚩</div>
       <div class="critical-notice-text">
-        <strong style="color:var(--yellow)">Environmental flags noted:</strong> ${flags.join(' · ')}<br>
+        <strong style="color:var(--amber)">Environmental flags noted:</strong> ${flags.join(' · ')}<br>
         Additional permits may be required. Consult with BLM and applicable state agencies.
       </div>
     </div>` : ''}
