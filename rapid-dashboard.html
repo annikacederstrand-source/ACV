@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAPID GeoPermit — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181b22;
+    --border: #22262f;
+    --border2: #2e3340;
+    --accent: #e8562a;
+    --accent2: #f0934a;
+    --accent-glow: rgba(232,86,42,0.15);
+    --green: #3ecf8e;
+    --green-dim: rgba(62,207,142,0.12);
+    --yellow: #f5c842;
+    --yellow-dim: rgba(245,200,66,0.1);
+    --blue: #4a9eff;
+    --blue-dim: rgba(74,158,255,0.1);
+    --text: #e8eaf0;
+    --text-dim: #8b90a0;
+    --text-faint: #4a4f5e;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --display: 'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── GRID NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── TOP NAV ── */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 32px;
+    background: rgba(10,12,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-brand {
+    display: flex; align-items: center; gap: 12px;
+  }
+
+  .nav-logo {
+    width: 32px; height: 32px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px; font-weight: 500;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .nav-title {
+    font-family: var(--display);
+    font-size: 16px; font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .nav-title span { color: var(--accent); }
+
+  .nav-meta {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--text-faint);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .nav-actions { display: flex; align-items: center; gap: 12px; }
+
+  .nav-link {
+    font-family: var(--mono);
+    font-size: 11px; color: var(--text-dim);
+    text-decoration: none;
+    letter-spacing: 0.05em;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: color .2s, background .2s;
+  }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--accent); }
+
+  .btn-new {
+    background: var(--accent);
+    color: white;
+    border: none; cursor: pointer;
+    font-family: var(--display);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 8px 18px;
+    border-radius: 6px;
+    transition: background .2s, transform .1s;
+    text-decoration: none;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-new:hover { background: #d44820; transform: translateY(-1px); }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    position: relative; z-index: 1;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 32px 80px;
+  }
+
+  /* ── HERO HEADER ── */
+  .hero {
+    margin-bottom: 40px;
+    padding: 40px 0 32px;
+    border-bottom: 1px solid var(--border);
+    display: grid; grid-template-columns: 1fr auto; align-items: end; gap: 24px;
+  }
+
+  .hero-label {
+    font-family: var(--mono);
+    font-size: 11px; color: var(--accent);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .hero-h1 {
+    font-family: var(--display);
+    font-size: 42px; font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-sub {
+    font-size: 14px; color: var(--text-dim);
+    margin-top: 12px; line-height: 1.6;
+    max-width: 560px;
+  }
+
+  .hero-stats {
+    display: flex; gap: 24px;
+  }
+
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    text-align: center;
+    min-width: 100px;
+  }
+
+  .stat-num {
+    font-family: var(--display);
+    font-size: 28px; font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--text-faint);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-top: 4px;
+  }
+
+  /* ── PHASE OVERVIEW ── */
+  .section-title {
+    font-family: var(--display);
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  .phases-row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 2px;
+    margin-bottom: 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+
+  .phase-card {
+    background: var(--surface);
+    padding: 20px 16px;
+    cursor: pointer;
+    transition: background .2s;
+    position: relative;
+  }
+  .phase-card:hover { background: var(--surface2); }
+  .phase-card.active { background: var(--surface2); }
+  .phase-card.active::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .phase-num {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--accent);
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+
+  .phase-name {
+    font-family: var(--display);
+    font-size: 13px; font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .phase-count {
+    font-family: var(--mono);
+    font-size: 11px; color: var(--text-dim);
+  }
+
+  /* ── CONTENT GRID ── */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    margin-bottom: 40px;
+  }
+
+  /* ── PERMIT TABLE ── */
+  .permit-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .panel-title {
+    font-family: var(--display);
+    font-size: 15px; font-weight: 700;
+  }
+
+  .panel-badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--accent-glow);
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    border: 1px solid var(--accent);
+  }
+
+  .permit-filters {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    font-family: var(--mono);
+    font-size: 10px; font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid var(--border2);
+    background: transparent;
+    color: var(--text-dim);
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all .2s;
+  }
+  .filter-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: white;
+  }
+
+  .permit-list { padding: 8px 0; }
+
+  .permit-row {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background .15s;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 14px;
+    align-items: start;
+  }
+  .permit-row:last-child { border-bottom: none; }
+  .permit-row:hover { background: var(--surface2); }
+
+  .permit-icon {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .icon-federal { background: var(--blue-dim); }
+  .icon-state { background: var(--green-dim); }
+  .icon-env { background: var(--yellow-dim); }
+
+  .permit-info { min-width: 0; }
+
+  .permit-name {
+    font-family: var(--display);
+    font-size: 13px; font-weight: 600;
+    margin-bottom: 3px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  .permit-agency {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--text-dim);
+    letter-spacing: 0.03em;
+  }
+
+  .permit-form {
+    font-family: var(--mono);
+    font-size: 9px; color: var(--text-faint);
+    margin-top: 2px;
+  }
+
+  .permit-meta {
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .permit-timeline {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  .permit-tag {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-top: 4px;
+    letter-spacing: 0.03em;
+  }
+  .tag-federal { background: var(--blue-dim); color: var(--blue); border: 1px solid rgba(74,158,255,0.2); }
+  .tag-state { background: var(--green-dim); color: var(--green); border: 1px solid rgba(62,207,142,0.2); }
+  .tag-env { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,200,66,0.2); }
+
+  /* ── SIDEBAR ── */
+  .sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .info-card-header {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .info-card-title {
+    font-family: var(--display);
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .info-card-body { padding: 16px 18px; }
+
+  /* Phase timeline */
+  .timeline { display: flex; flex-direction: column; gap: 0; }
+
+  .timeline-item {
+    display: flex; gap: 12px;
+    padding-bottom: 16px;
+    position: relative;
+  }
+  .timeline-item:last-child { padding-bottom: 0; }
+
+  .timeline-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    margin-top: 5px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  .timeline-dot.done { background: var(--green); }
+  .timeline-dot.active { background: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+  .timeline-item:not(:last-child) .timeline-dot::after {
+    content: '';
+    position: absolute;
+    top: 8px; left: 3px;
+    width: 2px;
+    height: calc(100% + 8px);
+    background: var(--border2);
+  }
+
+  .timeline-label {
+    font-family: var(--sans);
+    font-size: 12px; font-weight: 500;
+    line-height: 1.3;
+  }
+  .timeline-sub {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--text-faint);
+    margin-top: 2px;
+  }
+
+  /* Acronym glossary */
+  .glossary { display: flex; flex-direction: column; gap: 8px; }
+
+  .glossary-item {
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+
+  .glossary-abbr {
+    font-family: var(--mono);
+    font-size: 11px; font-weight: 500;
+    color: var(--accent);
+    min-width: 52px;
+  }
+
+  .glossary-def {
+    font-size: 11px; color: var(--text-dim);
+    line-height: 1.4;
+  }
+
+  /* Jurisdiction card */
+  .jx-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .jx-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  .jx-name { font-size: 12px; font-weight: 500; }
+
+  .jx-count {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--text-dim);
+  }
+
+  .jx-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  /* ── NEPA CALLOUT ── */
+  .nepa-band {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--yellow);
+    border-radius: 0 10px 10px 0;
+    padding: 18px 24px;
+    margin-bottom: 40px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 16px;
+    align-items: center;
+  }
+
+  .nepa-icon { font-size: 22px; }
+
+  .nepa-text h3 {
+    font-family: var(--display);
+    font-size: 14px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .nepa-text p {
+    font-size: 12px; color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .nepa-types {
+    display: flex; gap: 8px;
+  }
+
+  .nepa-badge {
+    font-family: var(--mono);
+    font-size: 10px; font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 6px;
+    text-align: center;
+    min-width: 44px;
+  }
+  .nepa-cx { background: var(--green-dim); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .nepa-ea { background: var(--yellow-dim); color: var(--yellow); border: 1px solid rgba(245,200,66,0.25); }
+  .nepa-eis { background: rgba(232,86,42,0.1); color: var(--accent); border: 1px solid rgba(232,86,42,0.25); }
+
+  .nepa-badge div:first-child { font-size: 13px; font-weight: 600; }
+  .nepa-badge div:last-child { font-size: 9px; color: inherit; opacity: 0.8; margin-top: 2px; }
+
+  /* ── BOTTOM GRID ── */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .2s, transform .2s;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+  .feature-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-emoji { font-size: 24px; margin-bottom: 12px; }
+
+  .feature-title {
+    font-family: var(--display);
+    font-size: 15px; font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .feature-desc {
+    font-size: 12px; color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .feature-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono);
+    font-size: 10px; color: var(--accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-top: 14px;
+  }
+
+  /* ── DETAIL DRAWER ── */
+  .drawer-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    opacity: 0; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .drawer-overlay.open { opacity: 1; pointer-events: all; }
+
+  .drawer {
+    position: fixed; top: 0; right: -480px;
+    width: 480px; height: 100vh;
+    background: var(--surface);
+    border-left: 1px solid var(--border2);
+    z-index: 201;
+    overflow-y: auto;
+    transition: right .3s cubic-bezier(.4,0,.2,1);
+    padding: 0;
+  }
+  .drawer.open { right: 0; }
+
+  .drawer-header {
+    padding: 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: flex-start; justify-content: space-between;
+    position: sticky; top: 0;
+    background: var(--surface);
+    z-index: 1;
+  }
+
+  .drawer-close {
+    background: none; border: 1px solid var(--border);
+    color: var(--text-dim); cursor: pointer;
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all .2s;
+  }
+  .drawer-close:hover { border-color: var(--accent); color: var(--accent); }
+
+  .drawer-content { padding: 24px; }
+
+  .drawer-phase-tag {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--accent);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .drawer-title {
+    font-family: var(--display);
+    font-size: 20px; font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .drawer-agency {
+    font-family: var(--mono);
+    font-size: 11px; color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  .drawer-section {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .drawer-section-title {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--text-faint);
+    letter-spacing: 0.1em; text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .drawer-body {
+    font-size: 13px; color: var(--text-dim);
+    line-height: 1.7;
+  }
+
+  .drawer-meta-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .drawer-meta-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+
+  .drawer-meta-label {
+    font-family: var(--mono);
+    font-size: 9px; color: var(--text-faint);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .drawer-meta-value {
+    font-size: 13px; font-weight: 500;
+  }
+
+  .req-list { display: flex; flex-direction: column; gap: 6px; }
+
+  .req-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 8px 12px;
+    background: var(--surface2);
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .req-item::before {
+    content: '→';
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 11px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
+
+  .drawer-rapid-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    background: var(--accent-glow);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    color: var(--accent);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 500;
+    transition: background .2s;
+    margin-top: 8px;
+  }
+  .drawer-rapid-link:hover { background: rgba(232,86,42,0.2); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 20px 32px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+
+  .footer-text {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--text-faint);
+    letter-spacing: 0.05em;
+  }
+
+  .footer-links { display: flex; gap: 16px; }
+
+  .footer-link {
+    font-family: var(--mono);
+    font-size: 10px; color: var(--text-faint);
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color .2s;
+  }
+  .footer-link:hover { color: var(--accent); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 900px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .phases-row { grid-template-columns: repeat(3, 1fr); }
+    .bottom-grid { grid-template-columns: 1fr; }
+    .hero { grid-template-columns: 1fr; }
+    .hero-stats { justify-content: flex-start; }
+    .nepa-band { grid-template-columns: auto 1fr; }
+    .nepa-types { display: none; }
+    .drawer { width: 100vw; }
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .animate { animation: fadeUp .5s ease forwards; opacity: 0; }
+  .delay-1 { animation-delay: .1s; }
+  .delay-2 { animation-delay: .2s; }
+  .delay-3 { animation-delay: .3s; }
+  .delay-4 { animation-delay: .4s; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-brand">
+    <div class="nav-logo">G</div>
+    <div>
+      <div class="nav-title">RAPID <span>GeoPermit</span></div>
+      <div class="nav-meta">Geothermal Regulatory Intelligence</div>
+    </div>
+  </div>
+  <div class="nav-actions">
+    <a href="#" class="nav-link active">Dashboard</a>
+    <a href="rapid-new-project.html" class="nav-link">Projects</a>
+    <a href="https://openei.org/wiki/RAPID/Geothermal" target="_blank" class="nav-link">RAPID ↗</a>
+    <a href="rapid-new-project.html" class="btn-new">
+      <span>＋</span> New Project
+    </a>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+
+  <!-- HERO -->
+  <div class="hero animate">
+    <div>
+      <div class="hero-label">RAPID Toolkit · Geothermal Module</div>
+      <h1 class="hero-h1">Regulatory &<br>Permitting Hub</h1>
+      <p class="hero-sub">AI-assisted navigation of federal and state geothermal permitting requirements. Grounded in the DOE/NREL RAPID Toolkit — covering BLM, USFS, NEPA, and state-level processes across Fervo's operational acreage.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-box">
+        <div class="stat-num">22+</div>
+        <div class="stat-label">Permit Types</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">5</div>
+        <div class="stat-label">Dev Phases</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num">500K+</div>
+        <div class="stat-label">Net Acres</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PHASE OVERVIEW -->
+  <div class="section-title animate delay-1">Development Phases</div>
+  <div class="phases-row animate delay-1" id="phaseRow">
+    <div class="phase-card active" onclick="filterPhase('all', this)">
+      <div class="phase-num">ALL</div>
+      <div class="phase-name">All Phases</div>
+      <div class="phase-count">22 permits</div>
+    </div>
+    <div class="phase-card" onclick="filterPhase('exploration', this)">
+      <div class="phase-num">PHASE 1</div>
+      <div class="phase-name">Exploration</div>
+      <div class="phase-count">5 permits</div>
+    </div>
+    <div class="phase-card" onclick="filterPhase('leasing', this)">
+      <div class="phase-num">PHASE 2</div>
+      <div class="phase-name">Leasing</div>
+      <div class="phase-count">4 permits</div>
+    </div>
+    <div class="phase-card" onclick="filterPhase('drilling', this)">
+      <div class="phase-num">PHASE 3</div>
+      <div class="phase-name">Drilling</div>
+      <div class="phase-count">5 permits</div>
+    </div>
+    <div class="phase-card" onclick="filterPhase('construction', this)">
+      <div class="phase-num">PHASE 4</div>
+      <div class="phase-name">Construction</div>
+      <div class="phase-count">5 permits</div>
+    </div>
+    <div class="phase-card" onclick="filterPhase('utilization', this)">
+      <div class="phase-num">PHASE 5</div>
+      <div class="phase-name">Utilization</div>
+      <div class="phase-count">3 permits</div>
+    </div>
+  </div>
+
+  <!-- NEPA CALLOUT -->
+  <div class="nepa-band animate delay-2">
+    <div class="nepa-icon">⚖️</div>
+    <div class="nepa-text">
+      <h3>NEPA Review — Required at Multiple Phases</h3>
+      <p>National Environmental Policy Act review is triggered at leasing, drilling (each GDP), and utilization. NEPA approval timelines range 1–4 years depending on review type. GDPs are <em>not</em> eligible for Categorical Exclusion (CX) classification — expect EA or DNA review.</p>
+    </div>
+    <div class="nepa-types">
+      <div class="nepa-badge nepa-cx">
+        <div>CX</div>
+        <div>Cat. Exclusion</div>
+      </div>
+      <div class="nepa-badge nepa-ea">
+        <div>EA</div>
+        <div>Env. Assessment</div>
+      </div>
+      <div class="nepa-badge nepa-eis">
+        <div>EIS</div>
+        <div>Env. Impact Stmt</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENT GRID -->
+  <div class="content-grid animate delay-3">
+
+    <!-- PERMIT TABLE -->
+    <div class="permit-panel">
+      <div class="panel-header">
+        <span class="panel-title">Federal & State Permit Register</span>
+        <span class="panel-badge" id="permitCount">22 PERMITS</span>
+      </div>
+      <div class="permit-filters">
+        <button class="filter-btn active" onclick="filterType('all', this)">All</button>
+        <button class="filter-btn" onclick="filterType('federal', this)">Federal</button>
+        <button class="filter-btn" onclick="filterType('state', this)">State</button>
+        <button class="filter-btn" onclick="filterType('env', this)">Environmental</button>
+      </div>
+      <div class="permit-list" id="permitList"></div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <!-- Project Phase Timeline -->
+      <div class="info-card animate delay-3">
+        <div class="info-card-header">
+          <span class="info-card-title">Typical Project Timeline</span>
+        </div>
+        <div class="info-card-body">
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="timeline-dot done"></div>
+              <div>
+                <div class="timeline-label">Land Access & Exploration</div>
+                <div class="timeline-sub">NOI · Surface surveys · TGW</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot done"></div>
+              <div>
+                <div class="timeline-label">Competitive Leasing (BLM)</div>
+                <div class="timeline-sub">Form 3200-024a · LUP conformance</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot active"></div>
+              <div>
+                <div class="timeline-label">Exploration Drilling</div>
+                <div class="timeline-sub">GDP · POO · NEPA EA — 1–4 yrs</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div>
+                <div class="timeline-label">Construction & ROW</div>
+                <div class="timeline-sub">Road access · Pipelines · CWA 404</div>
+              </div>
+            </div>
+            <div class="timeline-item">
+              <div class="timeline-dot"></div>
+              <div>
+                <div class="timeline-label">Utilization & Power Plant</div>
+                <div class="timeline-sub">POU · FERC interconnection · Site License</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Jurisdictions -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <span class="info-card-title">Key Jurisdictions (Western US)</span>
+        </div>
+        <div class="info-card-body">
+          <div class="jx-list">
+            <div class="jx-item">
+              <div><div class="jx-name">Nevada</div><div style="font-size:11px;color:var(--text-dim)">Major Fervo acreage</div></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="jx-count">BLM · NDEP</span><div class="jx-dot"></div></div>
+            </div>
+            <div class="jx-item">
+              <div><div class="jx-name">Utah</div><div style="font-size:11px;color:var(--text-dim)">Cape Station</div></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="jx-count">BLM · UDOGM</span><div class="jx-dot"></div></div>
+            </div>
+            <div class="jx-item">
+              <div><div class="jx-name">Oregon</div><div style="font-size:11px;color:var(--text-dim)">Exploration acreage</div></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="jx-count">BLM · DOGAMI</span><div class="jx-dot"></div></div>
+            </div>
+            <div class="jx-item">
+              <div><div class="jx-name">California</div><div style="font-size:11px;color:var(--text-dim)">Salton Sea corridor</div></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="jx-count">BLM · CalGEM</span><div class="jx-dot"></div></div>
+            </div>
+            <div class="jx-item">
+              <div><div class="jx-name">Federal (All)</div><div style="font-size:11px;color:var(--text-dim)">BLM-managed lands</div></div>
+              <div style="display:flex;align-items:center;gap:8px"><span class="jx-count">43 CFR Part 3200</span><div class="jx-dot" style="background:var(--blue)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Glossary -->
+      <div class="info-card">
+        <div class="info-card-header">
+          <span class="info-card-title">Key Acronyms</span>
+        </div>
+        <div class="info-card-body">
+          <div class="glossary">
+            <div class="glossary-item"><span class="glossary-abbr">BLM</span><span class="glossary-def">Bureau of Land Management — primary federal lessor</span></div>
+            <div class="glossary-item"><span class="glossary-abbr">GDP</span><span class="glossary-def">Geothermal Drilling Permit (Form 3260-002)</span></div>
+            <div class="glossary-item"><span class="glossary-abbr">POO</span><span class="glossary-def">Plan of Operations — drilling site management plan</span></div>
+            <div class="glossary-item"><span class="glossary-abbr">POU</span><span class="glossary-def">Plan of Utilization — power plant construction approval</span></div>
+            <div class="glossary-item"><span class="glossary-abbr">NOI</span><span class="glossary-def">Notice of Intent to Conduct Exploration (Form 3200-009)</span></div>
+            <div class="glossary-item"><span class="glossary-abbr">ROW</span><span class="glossary-def">Right-of-Way — off-lease surface access authorization</span></div>
+            <div class="glossary-item"><span class="glossary-abbr">NEPA</span><span class="glossary-def">National Environmental Policy Act — environmental review</span></div>
+            <div class="glossary-item"><span class="glossary-abbr">LUP</span><span class="glossary-def">Land Use Plan — governs allowable land uses per area</span></div>
+            <div class="glossary-item"><span class="glossary-abbr">USFS</span><span class="glossary-def">US Forest Service — surface management on forest land</span></div>
+            <div class="glossary-item"><span class="glossary-abbr">TGW</span><span class="glossary-def">Temperature Gradient Well — early exploration drilling</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BOTTOM FEATURES -->
+  <div class="section-title animate delay-4">Tools & Resources</div>
+  <div class="bottom-grid animate delay-4">
+    <a href="rapid-new-project.html" class="feature-card">
+      <div class="feature-emoji">🗺️</div>
+      <div class="feature-title">New Project Permit Wizard</div>
+      <div class="feature-desc">Input project location, type, and timeline to generate a tailored permit checklist with RAPID Toolkit references and estimated timelines.</div>
+      <div class="feature-link">Launch Wizard →</div>
+    </a>
+    <a href="https://openei.org/wiki/RAPID/Geothermal" target="_blank" class="feature-card">
+      <div class="feature-emoji">📚</div>
+      <div class="feature-title">RAPID Toolkit Reference</div>
+      <div class="feature-desc">Direct access to the full NREL/OpenEI RAPID Geothermal module — state-by-state regulatory roadmaps, flowcharts, and reference library.</div>
+      <div class="feature-link">Open RAPID ↗</div>
+    </a>
+    <a href="#" class="feature-card" onclick="alert('Coming soon: State comparison matrix tool')">
+      <div class="feature-emoji">⚖️</div>
+      <div class="feature-title">State Comparison Matrix</div>
+      <div class="feature-desc">Compare permitting requirements, timelines, and agency contacts across up to 4 western states simultaneously — based on RAPID's comparative tool.</div>
+      <div class="feature-link">Coming Soon →</div>
+    </a>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-text">RAPID GeoPermit · Built on DOE/NREL RAPID Toolkit · Data: openei.org/wiki/RAPID</div>
+  <div class="footer-links">
+    <a href="https://openei.org/wiki/RAPID" target="_blank" class="footer-link">RAPID Toolkit</a>
+    <a href="https://www.energy.gov/eere/geothermal" target="_blank" class="footer-link">DOE Geothermal</a>
+    <a href="https://www.blm.gov/programs/energy-and-minerals/renewable-energy/geothermal" target="_blank" class="footer-link">BLM Geothermal</a>
+  </div>
+</footer>
+
+<!-- DETAIL DRAWER -->
+<div class="drawer-overlay" id="overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div>
+      <div class="drawer-phase-tag" id="dPhase"></div>
+      <div class="drawer-title" id="dTitle"></div>
+      <div class="drawer-agency" id="dAgency"></div>
+    </div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-content" id="drawerContent"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// PERMIT DATABASE — Frontloaded from RAPID Toolkit
+// Source: openei.org/wiki/RAPID/Geothermal
+// ═══════════════════════════════════════════════
+const PERMITS = [
+  // ── PHASE 1: EXPLORATION ──
+  {
+    id: 'noi', phase: 'exploration', type: 'federal',
+    name: 'Notice of Intent (NOI)', icon: '🔍',
+    agency: 'Bureau of Land Management (BLM)',
+    form: 'Form 3200-009',
+    cfr: '43 CFR § 3252',
+    timeline: '30–60 days',
+    nepa: 'CX eligible',
+    description: 'Required before conducting geothermal resource exploration operations on federal land. Covers non-invasive and minimally invasive exploration activities such as temperature gradient wells and limited drilling.',
+    requirements: [
+      'Submit to local BLM field office with project description',
+      'Covers only exploration activities — not development drilling',
+      'Upon completion, submit Notice of Completion (Form 3200-010)',
+      'NOI does not authorize activities requiring surface disturbance beyond exploration',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Leasing',
+    keylaw: 'Geothermal Steam Act of 1970, as amended by EPAct 2005'
+  },
+  {
+    id: 'lup', phase: 'exploration', type: 'federal',
+    name: 'Land Use Plan (LUP) Conformance', icon: '🗺️',
+    agency: 'BLM / USFS',
+    form: 'No standard form — internal BLM review',
+    cfr: '43 CFR Part 1600',
+    timeline: 'Varies (project-dependent)',
+    nepa: 'Required',
+    description: 'Before any permit can be authorized, the proposed project must conform to the applicable Land Use Plan (LUP) for the management unit. Non-conforming uses require an LUP amendment or revision before any ROW or special use permit can be authorized.',
+    requirements: [
+      'Review applicable Resource Management Plan (RMP) for the BLM field office',
+      'Identify any land use conflicts or restricted areas',
+      'LUP amendment may be required if project is non-conforming',
+      'USFS uses "Forest Plans" instead of RMPs but serves the same function',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Roadmap/3'
+  },
+  {
+    id: 'survey', phase: 'exploration', type: 'federal',
+    name: 'Exploration Survey Authorization', icon: '📡',
+    agency: 'BLM / USFS / State',
+    form: 'Varies by state and land type',
+    cfr: '43 CFR Part 3250',
+    timeline: '15–45 days',
+    nepa: 'CX for non-invasive',
+    description: 'Non-invasive surveys (satellite, aeromagnetic, gravity, passive seismic) may require only land access permits. Invasive techniques like reflection seismology with explosives or core hole drilling require additional drilling permits and potentially NEPA review.',
+    requirements: [
+      'Non-invasive: land access permission from surface owner/manager',
+      'Invasive seismic with explosives: additional explosive use permits',
+      'Private land: written permission from landowner sufficient',
+      'Federal land: coordinate with BLM/USFS field office',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Leasing'
+  },
+  {
+    id: 'tgw', phase: 'exploration', type: 'federal',
+    name: 'Temperature Gradient Well (TGW) Permit', icon: '🌡️',
+    agency: 'BLM + State Oil & Gas Agency',
+    form: 'GDP Form 3260-002 (BLM) + State form',
+    cfr: '43 CFR § 3261',
+    timeline: '60–180 days',
+    nepa: 'CX eligible (typically)',
+    description: 'Shallow exploratory wells drilled to measure subsurface temperature gradients and confirm geothermal resource potential. Typically shallower than production wells and may qualify for Categorical Exclusion under NEPA, expediting approval.',
+    requirements: [
+      'BLM Geothermal Drilling Permit (GDP) required on federal land',
+      'State drilling permit also required (varies by state)',
+      'Wellbore integrity and casing standards must be met',
+      'Reclamation bond required',
+      'Well logs must be submitted to BLM upon completion',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Exploration'
+  },
+  {
+    id: 'surfacedist', phase: 'exploration', type: 'env',
+    name: 'Cultural & Resource Survey (NHPA/ESA)', icon: '🏛️',
+    agency: 'BLM + SHPO + USFWS',
+    form: 'Section 106 consultation (NHPA) + Section 7 (ESA)',
+    cfr: '36 CFR Part 800; 50 CFR Part 402',
+    timeline: '60–180 days',
+    nepa: 'Part of NEPA process',
+    description: 'Section 106 (National Historic Preservation Act) requires consultation with State Historic Preservation Office (SHPO) before ground disturbance. If threatened/endangered species may be present, Section 7 consultation with USFWS is required.',
+    requirements: [
+      'Conduct Class III cultural resources inventory in APE',
+      'Consult with SHPO — 30-day response period (extendable)',
+      'Biological survey for T&E species if habitat present',
+      'Section 7 consultation with USFWS if federal nexus and T&E species',
+      'May require mitigation measures or project modifications',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Construction_%26_Transportation'
+  },
+
+  // ── PHASE 2: LEASING ──
+  {
+    id: 'lease', phase: 'leasing', type: 'federal',
+    name: 'Geothermal Resource Lease', icon: '📋',
+    agency: 'Bureau of Land Management (BLM)',
+    form: 'Form 3200-024a',
+    cfr: '43 CFR Part 3200–3203',
+    timeline: '6–18 months (competitive)',
+    nepa: 'EA typically required',
+    description: 'The primary authorization for geothermal resource development on BLM-managed federal land. Required for all activities beyond exploration covered under a NOI. BLM issues leases through competitive nominations and auctions. Lease term: 10 years with priority renewal.',
+    requirements: [
+      'Land must be open to geothermal leasing under applicable LUP',
+      'Competitive lease sale — nominators submit expressions of interest',
+      'NEPA review completed at leasing stage (EA or EIS)',
+      'Lease stipulations attached — may include seasonal restrictions',
+      'Royalty rate: typically 1.75% for first 10 years, then 3.5%',
+      'Rental fees apply during non-production period',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Leasing',
+    keylaw: 'Geothermal Steam Act of 1970 (30 U.S.C. §§ 1001–1028)'
+  },
+  {
+    id: 'row', phase: 'leasing', type: 'federal',
+    name: 'Right-of-Way (ROW) Grant', icon: '🛤️',
+    agency: 'BLM / USFS / DOT',
+    form: 'SF-299 (federal ROW application)',
+    cfr: '43 CFR Part 2800 (BLM); 36 CFR Part 251 (USFS)',
+    timeline: '6–24 months',
+    nepa: 'EA or EIS often required',
+    description: 'Required for off-lease activities including transmission lines, access roads, pipelines, and facility siting. On-lease activities are generally authorized as lease rights. Each agency (BLM, USFS, DOT) has separate ROW processes.',
+    requirements: [
+      'File SF-299 with applicable surface management agency',
+      'Describe purpose, location, and duration of ROW',
+      'Environmental and cultural resource studies required',
+      'Coordinate with adjacent landowners and agencies',
+      'Annual rental fees apply',
+      'Bonding and reclamation plan required',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Roadmap/3'
+  },
+  {
+    id: 'spup', phase: 'leasing', type: 'federal',
+    name: 'Special Use Permit (USFS)', icon: '🌲',
+    agency: 'US Forest Service (USFS)',
+    form: 'FS-2700-3 or FS-2700-4',
+    cfr: '36 CFR Part 251, Subpart B',
+    timeline: '6–18 months',
+    nepa: 'Required',
+    description: 'When the surface is managed by the USFS but geothermal rights are federal or non-federal, a Special Use Permit (SUP) is required to access and use National Forest System lands. Distinct from BLM ROW process.',
+    requirements: [
+      'Must be consistent with applicable Forest Plan',
+      'NEPA analysis required (typically EA)',
+      'Reclamation and bonding requirements',
+      'Annual rental/fee structure set by USFS',
+      'Operations plan required',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Leasing'
+  },
+  {
+    id: 'tribal', phase: 'leasing', type: 'federal',
+    name: 'Tribal Consultation & Lands Authorization', icon: '🤝',
+    agency: 'Bureau of Indian Affairs (BIA) + Tribal governments',
+    form: 'Varies — BIA lease approval required on tribal land',
+    cfr: '25 CFR Part 162 (leases); 25 CFR Part 211/212 (mineral)',
+    timeline: '6–24 months',
+    nepa: 'Required',
+    description: 'If any project activity occurs on or near tribal lands, formal government-to-government consultation is required. Leasing or access on tribal lands requires BIA approval. Section 106 NHPA consultation with tribes is required for all federal undertakings.',
+    requirements: [
+      'Government-to-government consultation with affected tribes',
+      'BIA approval required for leases on trust/tribal land',
+      'NHPA Section 106 consultation — tribes are consulting parties',
+      'Tribal Historic Preservation Officers (THPO) may substitute for SHPO',
+      'Consent of tribal governing body typically required',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+  },
+
+  // ── PHASE 3: DRILLING ──
+  {
+    id: 'gdp', phase: 'drilling', type: 'federal',
+    name: 'Geothermal Drilling Permit (GDP)', icon: '⛏️',
+    agency: 'Bureau of Land Management (BLM)',
+    form: 'Form 3260-002',
+    cfr: '43 CFR § 3261',
+    timeline: '90–365 days (EA required)',
+    nepa: 'EA or DNA required — NOT CX eligible',
+    description: 'Required for all geothermal drilling operations on federal land, including production and injection wells. GDPs are NOT eligible for Categorical Exclusion (CX) — they require at minimum an Environmental Assessment (EA) or a Determination of NEPA Adequacy (DNA) if a prior EA already contemplated the wells.',
+    requirements: [
+      'Well location, design, and casing program details required',
+      'Blowout prevention equipment specifications',
+      'Drilling fluids management plan',
+      'Reclamation and plugging bond required',
+      'NEPA: EA (first well) or DNA (subsequent wells within prior EA scope)',
+      'Cultural resource survey may be required if not already completed',
+      'Water rights documentation if water use anticipated',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Drilling',
+    keylaw: '43 CFR Part 3260 — Drilling Operations'
+  },
+  {
+    id: 'poo', phase: 'drilling', type: 'federal',
+    name: 'Plan of Operations (POO)', icon: '📐',
+    agency: 'BLM (coordination with USFS if applicable)',
+    form: 'Submitted alongside GDP — no separate form',
+    cfr: '43 CFR § 3262',
+    timeline: 'Reviewed concurrently with GDP',
+    nepa: 'Part of GDP NEPA process',
+    description: 'A site-specific management plan submitted with the GDP describing all operations, equipment, roads, pads, and reclamation measures. Required for development drilling. USFS requires a separate POO when surface is Forest Service-managed.',
+    requirements: [
+      'Drill site layout, road access, and staging area details',
+      'Equipment and materials inventory',
+      'Spill prevention and containment measures',
+      'Waste management and disposal plan',
+      'Reclamation schedule and bond estimate',
+      'Traffic management plan for access roads',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Drilling'
+  },
+  {
+    id: 'waterrights', phase: 'drilling', type: 'state',
+    name: 'Water Rights / Water Use Permit', icon: '💧',
+    agency: 'State Engineer / State Water Agency',
+    form: 'Varies by state',
+    cfr: 'State law (Prior Appropriation Doctrine)',
+    timeline: '6–24 months',
+    nepa: 'State SEPA may apply',
+    description: 'Geothermal operations commonly require water for drilling mud, well completion, and cooling. Western states operate under prior appropriation doctrine — water rights must be secured before use. Some states have specific geothermal fluid classification rules.',
+    requirements: [
+      'Apply to state engineer or water resources agency',
+      'Identify source, quantity, and purpose of water use',
+      'Prior appropriation: earlier filings have priority',
+      'Geothermal fluids may be classified separately from freshwater',
+      'Injection well water disposal may require separate authorization',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+  },
+  {
+    id: 'statedrill', phase: 'drilling', type: 'state',
+    name: 'State Drilling Permit', icon: '🏛️',
+    agency: 'State Oil, Gas & Geothermal Agency (varies)',
+    form: 'Varies: NV — NDEP; UT — UDOGM; OR — DOGAMI; CA — CalGEM',
+    cfr: 'State regulations',
+    timeline: '30–120 days',
+    nepa: 'State environmental review may apply',
+    description: 'In addition to the federal GDP, a state-level drilling permit is required in most western states. Each state has its own regulatory agency and requirements. Some states have streamlined coordination with BLM to reduce duplication.',
+    requirements: [
+      'Nevada: NDEP Division of Minerals (NRS 534A)',
+      'Utah: Utah Division of Oil, Gas & Mining (UDOGM)',
+      'Oregon: Oregon DOGAMI geothermal well permit',
+      'California: CalGEM (DOGGR) geothermal well permit',
+      'Well casing, cementing, and blowout prevention standards',
+      'Financial assurance / surety bond required',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+  },
+  {
+    id: 'uwic', phase: 'drilling', type: 'env',
+    name: 'Underground Injection Control (UIC) Permit', icon: '🔄',
+    agency: 'EPA / State Primacy Agency',
+    form: 'EPA Form or State equivalent',
+    cfr: '40 CFR Parts 144–148 (SDWA)',
+    timeline: '6–18 months',
+    nepa: 'Federal permit triggers NEPA',
+    description: 'Required for all injection wells used for geothermal fluid reinjection. Geothermal injection wells are typically classified as Class V wells under the Underground Injection Control (UIC) program of the Safe Drinking Water Act.',
+    requirements: [
+      'Class V UIC permit for geothermal reinjection wells',
+      'Mechanical integrity testing of injection wells',
+      'Injection pressure, volume, and chemistry monitoring',
+      'Groundwater protection analysis required',
+      'Annual reporting to EPA or state primacy agency',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+  },
+
+  // ── PHASE 4: CONSTRUCTION ──
+  {
+    id: 'cwa404', phase: 'construction', type: 'env',
+    name: 'CWA Section 404 Wetlands Permit', icon: '🌊',
+    agency: 'Army Corps of Engineers + EPA',
+    form: 'Individual Permit or Nationwide Permit (NWP)',
+    cfr: '33 CFR Parts 320–332',
+    timeline: '3–24 months (NWP faster)',
+    nepa: 'EIS may be required for individual permits',
+    description: 'Required if construction activities involve discharge of dredged or fill material into waters of the US, including wetlands. Many geothermal construction activities qualify for Nationwide Permits (NWPs) which are pre-approved for minimal impact activities.',
+    requirements: [
+      'Delineate all waters of the US within the project footprint',
+      'Nationwide Permit (NWP) for impacts under threshold limits',
+      'Individual permit for larger or more complex impacts',
+      'Mitigation required for unavoidable wetland impacts',
+      'Section 401 water quality certification from state required',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Construction_%26_Transportation'
+  },
+  {
+    id: 'airpermit', phase: 'construction', type: 'env',
+    name: 'Air Quality Permit (CAA)', icon: '💨',
+    agency: 'State Air Quality Agency + EPA (for major sources)',
+    form: 'Varies by state',
+    cfr: '40 CFR Parts 51, 52, 70, 71',
+    timeline: '3–12 months',
+    nepa: 'State review',
+    description: 'Required for construction and operation of equipment that emits air pollutants. Geothermal power plants may emit H₂S, NCG (non-condensable gases), and particulates. Sources below major source thresholds may qualify for minor source permits.',
+    requirements: [
+      'Construction permit required before equipment installation',
+      'Operating permit required after commissioning',
+      'H₂S abatement systems typically required for flash plants',
+      'Particulate matter controls for construction-phase dust',
+      'Title V permit if major source thresholds exceeded',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+  },
+  {
+    id: 'roadaccess', phase: 'construction', type: 'federal',
+    name: 'Access Road / Transportation Permit', icon: '🚧',
+    agency: 'BLM / USFS / State DOT / County',
+    form: 'ROW application + county/state oversize load permits',
+    cfr: '43 CFR Part 2800',
+    timeline: '3–12 months',
+    nepa: 'Typically included in larger NEPA doc',
+    description: 'Road construction on federal land requires ROW authorization. Oversize and overweight loads for drilling rigs and turbines require state and county permits. Dust control on unpaved haul roads may require additional permits.',
+    requirements: [
+      'ROW grant from BLM/USFS for new road construction',
+      'County road use agreement for local roads',
+      'Oversize/overweight load permits from state DOT',
+      'Dust control plan for unpaved roads',
+      'Traffic impact study may be required',
+      'Road reclamation bond',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Construction_%26_Transportation'
+  },
+  {
+    id: 'swppp', phase: 'construction', type: 'env',
+    name: 'Stormwater Pollution Prevention Plan (SWPPP)', icon: '🌧️',
+    agency: 'EPA / State (NPDES Construction General Permit)',
+    form: 'Notice of Intent (NOI) to EPA eNOI system',
+    cfr: '40 CFR Part 122',
+    timeline: '7 days after NOI submittal',
+    nepa: 'Not required separately',
+    description: 'Required for construction projects disturbing ≥1 acre of land. Developer must obtain coverage under the NPDES Construction General Permit by filing a NOI and implementing a SWPPP before ground disturbance begins.',
+    requirements: [
+      'Develop SWPPP before any land disturbance',
+      'File eNOI with EPA (or state primacy agency) ≥7 days before construction',
+      'Install BMPs (silt fences, sediment basins, stabilized entrances)',
+      'Inspect BMPs weekly and after 0.5" rainfall events',
+      'File Notice of Termination (NOT) upon final stabilization',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+  },
+  {
+    id: 'hazmat', phase: 'construction', type: 'env',
+    name: 'Hazardous Materials / SPCC Plan', icon: '⚠️',
+    agency: 'EPA + State environmental agency',
+    form: 'SPCC Plan (internal document, EPA-reviewed)',
+    cfr: '40 CFR Part 112 (SPCC); 40 CFR Part 264 (RCRA)',
+    timeline: '60 days before oil storage',
+    nepa: 'Not required',
+    description: 'Projects storing ≥1,320 gallons of oil in aggregate (or ≥660 gal in single container) above-ground must develop a Spill Prevention, Control & Countermeasure (SPCC) Plan. Drilling operations with chemical storage trigger RCRA hazardous waste requirements.',
+    requirements: [
+      'SPCC plan certified by PE if >10,000 gal storage',
+      'Secondary containment for all oil storage containers',
+      'Spill response equipment on site',
+      'Annual inspection and five-year PE review',
+      'RCRA: characterize and manage drilling waste properly',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+  },
+
+  // ── PHASE 5: UTILIZATION / POWER PLANT ──
+  {
+    id: 'pou', phase: 'utilization', type: 'federal',
+    name: 'Plan of Utilization (POU)', icon: '⚡',
+    agency: 'Bureau of Land Management (BLM)',
+    form: 'Submitted to BLM — no standard federal form',
+    cfr: '43 CFR §§ 3270–3274',
+    timeline: '12–36 months',
+    nepa: 'Full EIS typically required',
+    description: 'Required to authorize construction and operation of a geothermal power plant and related infrastructure on federal lease. Triggers comprehensive NEPA review. Covers production wells, injection wells, pipelines, power plant, and transmission interconnect.',
+    requirements: [
+      'Detailed project description and site plan',
+      'Environmental studies (biological, cultural, visual, noise)',
+      'Engineering specifications for power plant and well field',
+      'Water management plan (including reinjection)',
+      'Transmission interconnection plan',
+      'Decommissioning and reclamation plan',
+      'Financial assurance (bond) for reclamation',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Power_Plant',
+    keylaw: '43 CFR Part 3270 — Utilization Operations'
+  },
+  {
+    id: 'ferc', phase: 'utilization', type: 'federal',
+    name: 'FERC Interconnection / Small Power Production', icon: '🔌',
+    agency: 'Federal Energy Regulatory Commission (FERC)',
+    form: 'FERC Form 556 (QF Certification) or interconnection application',
+    cfr: '18 CFR Parts 292, 292.203 (PURPA QF)',
+    timeline: '3–18 months',
+    nepa: 'FERC may conduct independent review',
+    description: 'Geothermal power plants connecting to the federal transmission grid must comply with FERC interconnection requirements. Qualifying Facility (QF) status under PURPA may provide favorable power purchase rights. Projects >20 MW require formal FERC filing.',
+    requirements: [
+      'QF Self-Certification (Form 556) for facilities ≤80 MW',
+      'Interconnection application to transmission owner',
+      'Feasibility, system impact, and facilities studies',
+      'Large Generator Interconnection Agreement (LGIA) for projects >20 MW',
+      'Market-based rate authorization if selling into wholesale market',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+  },
+  {
+    id: 'sitelicense', phase: 'utilization', type: 'state',
+    name: 'Power Plant Site License / Certificate', icon: '🏭',
+    agency: 'State Public Utilities Commission or Energy Agency',
+    form: 'Varies by state — Application for Site Certificate (ASC)',
+    cfr: 'State law',
+    timeline: '12–36 months',
+    nepa: 'State SEPA required',
+    description: 'Most western states require a siting certificate or site license for power plants above a capacity threshold. This is typically the main state-level authorization for plant construction, triggering comprehensive state environmental review.',
+    requirements: [
+      'Nevada: PUCN Certificate of Public Convenience (for utility-scale)',
+      'Oregon: Energy Facility Siting Council (EFSC) Site Certificate (>25 MW)',
+      'Utah: Public Service Commission review',
+      'California: CEC certification for large plants (>50 MW)',
+      'State environmental impact review (state SEPA equivalent)',
+      'Public notice and comment period required',
+    ],
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+  },
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let activePhase = 'all';
+let activeType = 'all';
+
+// ═══════════════════════════════════════
+// RENDER PERMITS
+// ═══════════════════════════════════════
+function renderPermits() {
+  const list = document.getElementById('permitList');
+  const countEl = document.getElementById('permitCount');
+
+  const filtered = PERMITS.filter(p => {
+    const phaseMatch = activePhase === 'all' || p.phase === activePhase;
+    const typeMatch = activeType === 'all' || p.type === activeType;
+    return phaseMatch && typeMatch;
+  });
+
+  countEl.textContent = filtered.length + ' PERMITS';
+
+  list.innerHTML = filtered.map(p => `
+    <div class="permit-row" onclick="openDrawer('${p.id}')">
+      <div class="permit-icon icon-${p.type}">${p.icon}</div>
+      <div class="permit-info">
+        <div class="permit-name">${p.name}</div>
+        <div class="permit-agency">${p.agency}</div>
+        ${p.form ? `<div class="permit-form">${p.form}</div>` : ''}
+      </div>
+      <div class="permit-meta">
+        <div class="permit-timeline">⏱ ${p.timeline}</div>
+        <div class="permit-tag tag-${p.type}">${p.type.toUpperCase()}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterPhase(phase, el) {
+  activePhase = phase;
+  document.querySelectorAll('.phase-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderPermits();
+}
+
+function filterType(type, el) {
+  activeType = type;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderPermits();
+}
+
+// ═══════════════════════════════════════
+// DRAWER
+// ═══════════════════════════════════════
+function openDrawer(id) {
+  const p = PERMITS.find(x => x.id === id);
+  if (!p) return;
+
+  const phaseLabels = { exploration: 'Phase 1 — Exploration', leasing: 'Phase 2 — Leasing', drilling: 'Phase 3 — Drilling', construction: 'Phase 4 — Construction', utilization: 'Phase 5 — Utilization' };
+
+  document.getElementById('dPhase').textContent = phaseLabels[p.phase] || p.phase;
+  document.getElementById('dTitle').textContent = p.name;
+  document.getElementById('dAgency').textContent = p.agency;
+
+  document.getElementById('drawerContent').innerHTML = `
+    <div class="drawer-meta-grid">
+      <div class="drawer-meta-item">
+        <div class="drawer-meta-label">Est. Timeline</div>
+        <div class="drawer-meta-value">${p.timeline}</div>
+      </div>
+      <div class="drawer-meta-item">
+        <div class="drawer-meta-label">NEPA Review</div>
+        <div class="drawer-meta-value">${p.nepa || 'See notes'}</div>
+      </div>
+      ${p.form ? `<div class="drawer-meta-item">
+        <div class="drawer-meta-label">Form / Filing</div>
+        <div class="drawer-meta-value">${p.form}</div>
+      </div>` : ''}
+      ${p.cfr ? `<div class="drawer-meta-item">
+        <div class="drawer-meta-label">Regulation (CFR)</div>
+        <div class="drawer-meta-value">${p.cfr}</div>
+      </div>` : ''}
+    </div>
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">Overview</div>
+      <div class="drawer-body">${p.description}</div>
+    </div>
+
+    ${p.requirements ? `<div class="drawer-section">
+      <div class="drawer-section-title">Key Requirements</div>
+      <div class="req-list">${p.requirements.map(r => `<div class="req-item">${r}</div>`).join('')}</div>
+    </div>` : ''}
+
+    ${p.keylaw ? `<div class="drawer-section">
+      <div class="drawer-section-title">Governing Law</div>
+      <div class="drawer-body">${p.keylaw}</div>
+    </div>` : ''}
+
+    <div class="drawer-section">
+      <div class="drawer-section-title">RAPID Toolkit Reference</div>
+      <a href="${p.rapidUrl}" target="_blank" class="drawer-rapid-link">
+        🔗 View in RAPID Toolkit — openei.org
+      </a>
+    </div>
+  `;
+
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDrawer() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+// Init
+renderPermits();
+</script>
+</body>
+</html>
