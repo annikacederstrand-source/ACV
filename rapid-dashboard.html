@@ -614,7 +614,7 @@
     </div>
     <div class="hero-stats">
       <div class="stat-box">
-        <div class="stat-num">22+</div>
+        <div class="stat-num" id="statPermitCount">—</div>
         <div class="stat-label">Permit Types</div>
       </div>
       <div class="stat-box">
@@ -684,13 +684,25 @@
     <div class="permit-panel">
       <div class="panel-header">
         <span class="panel-title">Federal & State Permit Register</span>
-        <span class="panel-badge" id="permitCount">22 Permits</span>
+        <span class="panel-badge" id="permitCount">— Permits</span>
       </div>
-      <div class="permit-filters">
-        <button class="filter-btn active" onclick="filterType('all', this)">All</button>
-        <button class="filter-btn" onclick="filterType('federal', this)">Federal</button>
-        <button class="filter-btn" onclick="filterType('state', this)">State</button>
-        <button class="filter-btn" onclick="filterType('env', this)">Environmental</button>
+      <div class="permit-filters" style="align-items:center; justify-content:space-between; flex-wrap:nowrap; gap:12px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="filter-btn active" onclick="filterType('all', this)">All</button>
+          <button class="filter-btn" onclick="filterType('federal', this)">Federal</button>
+          <button class="filter-btn" onclick="filterType('state', this)">State</button>
+          <button class="filter-btn" onclick="filterType('env', this)">Environmental</button>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <label style="font-family:var(--mono);font-size:10px;color:var(--text-faint);letter-spacing:0.07em;text-transform:uppercase;white-space:nowrap;">State</label>
+          <select id="stateSelector" onchange="changeState(this.value)" style="background:var(--surface3);border:1px solid var(--border2);color:var(--text);font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:4px;outline:none;cursor:pointer;">
+            <option value="Nevada">Nevada</option>
+            <option value="Utah">Utah</option>
+            <option value="Oregon">Oregon</option>
+            <option value="California">California</option>
+            <option value="Colorado" selected>Colorado</option>
+          </select>
+        </div>
       </div>
       <div class="permit-list" id="permitList"></div>
     </div>
@@ -816,474 +828,543 @@
 <div class="drawer" id="drawer">
   <div class="drawer-header">
     <div>
-      <div class="drawer-phase-tag" id="dPhase"></div>
-      <div class="drawer-title" id="dTitle"></div>
-      <div class="drawer-agency" id="dAgency"></div>
-    </div>
-    <button class="drawer-close" onclick="closeDrawer()">✕</button>
-  </div>
-  <div class="drawer-content" id="drawerContent"></div>
-</div>
-
-  <div class="drawer-content" id="drawerContent"></div>
-</div>
 
 <script>
-// ═══════════════════════════════════════════════
-// PERMIT DATABASE — Frontloaded from RAPID Toolkit
-// Source: openei.org/wiki/RAPID/Geothermal
-// ═══════════════════════════════════════════════
-const PERMITS = [
-  // ── PHASE 1: EXPLORATION ──
-  {
-    id: 'noi', phase: 'exploration', type: 'federal',
-    name: 'Notice of Intent (NOI)', icon: '🔍',
-    agency: 'Bureau of Land Management (BLM)',
-    form: 'Form 3200-009',
-    cfr: '43 CFR § 3252',
-    timeline: '30–60 days',
-    nepa: 'CX eligible',
-    description: 'Required before conducting geothermal resource exploration operations on federal land. Covers non-invasive and minimally invasive exploration activities such as temperature gradient wells and limited drilling.',
-    requirements: [
-      'Submit to local BLM field office with project description',
-      'Covers only exploration activities — not development drilling',
-      'Upon completion, submit Notice of Completion (Form 3200-010)',
-      'NOI does not authorize activities requiring surface disturbance beyond exploration',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Leasing',
-    keylaw: 'Geothermal Steam Act of 1970, as amended by EPAct 2005'
-  },
-  {
-    id: 'lup', phase: 'exploration', type: 'federal',
-    name: 'Land Use Plan (LUP) Conformance', icon: '🗺️',
-    agency: 'BLM / USFS',
-    form: 'No standard form — internal BLM review',
-    cfr: '43 CFR Part 1600',
-    timeline: 'Varies (project-dependent)',
-    nepa: 'Required',
-    description: 'Before any permit can be authorized, the proposed project must conform to the applicable Land Use Plan (LUP) for the management unit. Non-conforming uses require an LUP amendment or revision before any ROW or special use permit can be authorized.',
-    requirements: [
-      'Review applicable Resource Management Plan (RMP) for the BLM field office',
-      'Identify any land use conflicts or restricted areas',
-      'LUP amendment may be required if project is non-conforming',
-      'USFS uses "Forest Plans" instead of RMPs but serves the same function',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Roadmap/3'
-  },
-  {
-    id: 'survey', phase: 'exploration', type: 'federal',
-    name: 'Exploration Survey Authorization', icon: '📡',
-    agency: 'BLM / USFS / State',
-    form: 'Varies by state and land type',
-    cfr: '43 CFR Part 3250',
-    timeline: '15–45 days',
-    nepa: 'CX for non-invasive',
-    description: 'Non-invasive surveys (satellite, aeromagnetic, gravity, passive seismic) may require only land access permits. Invasive techniques like reflection seismology with explosives or core hole drilling require additional drilling permits and potentially NEPA review.',
-    requirements: [
-      'Non-invasive: land access permission from surface owner/manager',
-      'Invasive seismic with explosives: additional explosive use permits',
-      'Private land: written permission from landowner sufficient',
-      'Federal land: coordinate with BLM/USFS field office',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Leasing'
-  },
-  {
-    id: 'tgw', phase: 'exploration', type: 'federal',
-    name: 'Temperature Gradient Well (TGW) Permit', icon: '🌡️',
-    agency: 'BLM + State Oil & Gas Agency',
-    form: 'GDP Form 3260-002 (BLM) + State form',
-    cfr: '43 CFR § 3261',
-    timeline: '60–180 days',
-    nepa: 'CX eligible (typically)',
-    description: 'Shallow exploratory wells drilled to measure subsurface temperature gradients and confirm geothermal resource potential. Typically shallower than production wells and may qualify for Categorical Exclusion under NEPA, expediting approval.',
-    requirements: [
-      'BLM Geothermal Drilling Permit (GDP) required on federal land',
-      'State drilling permit also required (varies by state)',
-      'Wellbore integrity and casing standards must be met',
-      'Reclamation bond required',
-      'Well logs must be submitted to BLM upon completion',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Exploration'
-  },
-  {
-    id: 'surfacedist', phase: 'exploration', type: 'env',
-    name: 'Cultural & Resource Survey (NHPA/ESA)', icon: '🏛️',
-    agency: 'BLM + SHPO + USFWS',
-    form: 'Section 106 consultation (NHPA) + Section 7 (ESA)',
-    cfr: '36 CFR Part 800; 50 CFR Part 402',
-    timeline: '60–180 days',
-    nepa: 'Part of NEPA process',
-    description: 'Section 106 (National Historic Preservation Act) requires consultation with State Historic Preservation Office (SHPO) before ground disturbance. If threatened/endangered species may be present, Section 7 consultation with USFWS is required.',
-    requirements: [
-      'Conduct Class III cultural resources inventory in APE',
-      'Consult with SHPO — 30-day response period (extendable)',
-      'Biological survey for T&E species if habitat present',
-      'Section 7 consultation with USFWS if federal nexus and T&E species',
-      'May require mitigation measures or project modifications',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Construction_%26_Transportation'
-  },
+// ═══════════════════════════════════════════════════════════════════
+// MULTI-STATE PERMIT DATABASE — RAPID Toolkit
+// Shared federal permits + state-specific permits for NV, UT, OR, CA, CO
+// Source: openei.org/wiki/RAPID/Geothermal/[State]
+// ═══════════════════════════════════════════════════════════════════
 
-  // ── PHASE 2: LEASING ──
+const FEDERAL_PERMITS = [
   {
-    id: 'lease', phase: 'leasing', type: 'federal',
-    name: 'Geothermal Resource Lease', icon: '📋',
-    agency: 'Bureau of Land Management (BLM)',
-    form: 'Form 3200-024a',
-    cfr: '43 CFR Part 3200–3203',
-    timeline: '6–18 months (competitive)',
-    nepa: 'EA typically required',
-    description: 'The primary authorization for geothermal resource development on BLM-managed federal land. Required for all activities beyond exploration covered under a NOI. BLM issues leases through competitive nominations and auctions. Lease term: 10 years with priority renewal.',
-    requirements: [
-      'Land must be open to geothermal leasing under applicable LUP',
-      'Competitive lease sale — nominators submit expressions of interest',
-      'NEPA review completed at leasing stage (EA or EIS)',
-      'Lease stipulations attached — may include seasonal restrictions',
-      'Royalty rate: typically 1.75% for first 10 years, then 3.5%',
-      'Rental fees apply during non-production period',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Leasing',
-    keylaw: 'Geothermal Steam Act of 1970 (30 U.S.C. §§ 1001–1028)'
+    id:'rmp', phase:'exploration', type:'federal', icon:'🗺️',
+    name:'BLM Resource Management Plan (RMP) Conformance',
+    agency:'Bureau of Land Management — applicable Field Office',
+    form:'Internal BLM review — no standard form',
+    citation:'43 CFR Part 1600; 2008 ROD (PGEIS)',
+    timeline:'1–3 months (confirm open status)',
+    nepa:'Covered by 2008 PGEIS if within ROD area; RMP amendment otherwise (1–3 yrs)',
+    critical:true, waterFlag:false,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'Before any permit issues, BLM must confirm the project parcel is open to geothermal leasing under the applicable Resource Management Plan. The 2008 ROD amended 114 BLM RMPs across 11 western states via a Programmatic EIS — projects within those areas skip the RMP amendment step. Projects outside require a full RMP revision, adding 1–3 years to the timeline.',
+    requirements:['Identify applicable BLM Field Office and its current RMP','Confirm parcel is within 2008 ROD/PGEIS coverage before lease nomination','If outside ROD: initiate RMP amendment (1–3 additional years)','Review for lease stipulations: NSO zones, seasonal restrictions, cultural overlays'],
   },
   {
-    id: 'row', phase: 'leasing', type: 'federal',
-    name: 'Right-of-Way (ROW) Grant', icon: '🛤️',
-    agency: 'BLM / USFS / DOT',
-    form: 'SF-299 (federal ROW application)',
-    cfr: '43 CFR Part 2800 (BLM); 36 CFR Part 251 (USFS)',
-    timeline: '6–24 months',
-    nepa: 'EA or EIS often required',
-    description: 'Required for off-lease activities including transmission lines, access roads, pipelines, and facility siting. On-lease activities are generally authorized as lease rights. Each agency (BLM, USFS, DOT) has separate ROW processes.',
-    requirements: [
-      'File SF-299 with applicable surface management agency',
-      'Describe purpose, location, and duration of ROW',
-      'Environmental and cultural resource studies required',
-      'Coordinate with adjacent landowners and agencies',
-      'Annual rental fees apply',
-      'Bonding and reclamation plan required',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Roadmap/3'
+    id:'nepa_lease', phase:'exploration', type:'federal', icon:'⚖️',
+    name:'NEPA Environmental Review — Leasing Stage',
+    agency:'Bureau of Land Management',
+    form:'Environmental Assessment (EA) or EIS',
+    citation:'42 U.S.C. § 4321; 43 CFR Part 46',
+    timeline:'6–18 months',
+    nepa:'EA required at leasing; EIS if significant impacts',
+    critical:true, waterFlag:true,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'All BLM geothermal leasing requires NEPA review — typically an EA leading to a FONSI. Water resource impacts, including effects on prior water rights, are a primary scoping issue in all western states. Results in lease stipulations on Form 3200-024a.',
+    requirements:['BLM prepares EA; scoping notice with 30-day public comment','Water resource analysis: availability and prior appropriation impacts','Section 106 NHPA (cultural) and Section 7 ESA (biological) concurrent','FONSI authorizes lease; significant impacts trigger full EIS'],
   },
   {
-    id: 'spup', phase: 'leasing', type: 'federal',
-    name: 'Special Use Permit (USFS)', icon: '🌲',
-    agency: 'US Forest Service (USFS)',
-    form: 'FS-2700-3 or FS-2700-4',
-    cfr: '36 CFR Part 251, Subpart B',
-    timeline: '6–18 months',
-    nepa: 'Required',
-    description: 'When the surface is managed by the USFS but geothermal rights are federal or non-federal, a Special Use Permit (SUP) is required to access and use National Forest System lands. Distinct from BLM ROW process.',
-    requirements: [
-      'Must be consistent with applicable Forest Plan',
-      'NEPA analysis required (typically EA)',
-      'Reclamation and bonding requirements',
-      'Annual rental/fee structure set by USFS',
-      'Operations plan required',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Leasing'
+    id:'nhpa_esa', phase:'exploration', type:'env', icon:'🏛️',
+    name:'NHPA Section 106 & ESA Section 7 Consultation',
+    agency:'BLM + State SHPO + U.S. Fish & Wildlife Service',
+    form:'Section 106 Consultation / Biological Opinion',
+    citation:'36 CFR Part 800 (NHPA); 50 CFR Part 402 (ESA)',
+    timeline:'3–12 months (concurrent with NEPA)',
+    nepa:'Integral to NEPA process',
+    critical:false, waterFlag:false,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'Two parallel federal consultation requirements triggered whenever BLM is the lead agency. Section 106 requires consultation with the State Historic Preservation Office before ground disturbance. Section 7 requires formal consultation with USFWS if listed species or critical habitat may be present. Both results feed into the NEPA EA.',
+    requirements:['Class III cultural resources inventory within Area of Potential Effects (APE)','Submit to SHPO — 30-day response period (extendable)','Biological survey for T&E species and critical habitat','If T&E present: Section 7 formal consultation with USFWS (135+ days)'],
   },
   {
-    id: 'tribal', phase: 'leasing', type: 'federal',
-    name: 'Tribal Consultation & Lands Authorization', icon: '🤝',
-    agency: 'Bureau of Indian Affairs (BIA) + Tribal governments',
-    form: 'Varies — BIA lease approval required on tribal land',
-    cfr: '25 CFR Part 162 (leases); 25 CFR Part 211/212 (mineral)',
-    timeline: '6–24 months',
-    nepa: 'Required',
-    description: 'If any project activity occurs on or near tribal lands, formal government-to-government consultation is required. Leasing or access on tribal lands requires BIA approval. Section 106 NHPA consultation with tribes is required for all federal undertakings.',
-    requirements: [
-      'Government-to-government consultation with affected tribes',
-      'BIA approval required for leases on trust/tribal land',
-      'NHPA Section 106 consultation — tribes are consulting parties',
-      'Tribal Historic Preservation Officers (THPO) may substitute for SHPO',
-      'Consent of tribal governing body typically required',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
-  },
-
-  // ── PHASE 3: DRILLING ──
-  {
-    id: 'gdp', phase: 'drilling', type: 'federal',
-    name: 'Geothermal Drilling Permit (GDP)', icon: '⛏️',
-    agency: 'Bureau of Land Management (BLM)',
-    form: 'Form 3260-002',
-    cfr: '43 CFR § 3261',
-    timeline: '90–365 days (EA required)',
-    nepa: 'EA or DNA required — NOT CX eligible',
-    description: 'Required for all geothermal drilling operations on federal land, including production and injection wells. GDPs are NOT eligible for Categorical Exclusion (CX) — they require at minimum an Environmental Assessment (EA) or a Determination of NEPA Adequacy (DNA) if a prior EA already contemplated the wells.',
-    requirements: [
-      'Well location, design, and casing program details required',
-      'Blowout prevention equipment specifications',
-      'Drilling fluids management plan',
-      'Reclamation and plugging bond required',
-      'NEPA: EA (first well) or DNA (subsequent wells within prior EA scope)',
-      'Cultural resource survey may be required if not already completed',
-      'Water rights documentation if water use anticipated',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Drilling',
-    keylaw: '43 CFR Part 3260 — Drilling Operations'
+    id:'blm_lease', phase:'leasing', type:'federal', icon:'📋',
+    name:'BLM Geothermal Resource Lease',
+    agency:'Bureau of Land Management',
+    form:'Form 3200-024a',
+    citation:'43 CFR Parts 3200–3203; Geothermal Steam Act of 1970 (30 U.S.C. § 1001)',
+    timeline:'6–18 months (competitive lease sale)',
+    nepa:'EA completed at leasing stage',
+    critical:true, waterFlag:false,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'Primary federal authorization for geothermal resource development on BLM land — required across all 5 states. Issued through competitive nomination and auction. Lease term: 10 years with priority renewal. Royalties: 1.75% first 10 years, then 3.5%.',
+    requirements:['Submit Expression of Interest/Lease Nomination to BLM State Office','BLM publishes Notice of Competitive Lease Sale — 45-day protest period','Competitive oral auction; site-specific stipulations attached to lease','Annual rental ~$2/acre non-production; NEPA must complete before issuance'],
   },
   {
-    id: 'poo', phase: 'drilling', type: 'federal',
-    name: 'Plan of Operations (POO)', icon: '📐',
-    agency: 'BLM (coordination with USFS if applicable)',
-    form: 'Submitted alongside GDP — no separate form',
-    cfr: '43 CFR § 3262',
-    timeline: 'Reviewed concurrently with GDP',
-    nepa: 'Part of GDP NEPA process',
-    description: 'A site-specific management plan submitted with the GDP describing all operations, equipment, roads, pads, and reclamation measures. Required for development drilling. USFS requires a separate POO when surface is Forest Service-managed.',
-    requirements: [
-      'Drill site layout, road access, and staging area details',
-      'Equipment and materials inventory',
-      'Spill prevention and containment measures',
-      'Waste management and disposal plan',
-      'Reclamation schedule and bond estimate',
-      'Traffic management plan for access roads',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Drilling'
+    id:'blm_row', phase:'leasing', type:'federal', icon:'🛤️',
+    name:'BLM Right-of-Way (ROW) Grant — Off-Lease Infrastructure',
+    agency:'Bureau of Land Management',
+    form:'SF-299',
+    citation:'43 CFR Part 2800',
+    timeline:'6–18 months',
+    nepa:'EA required; may tier off leasing EA',
+    critical:false, waterFlag:false,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'Required in all 5 states for any infrastructure outside the geothermal lease footprint: access roads, transmission lines, pipelines, water supply lines, off-lease facility siting. Each ROW has its own bond and annual rental.',
+    requirements:['File SF-299 with BLM Field Office — purpose, centerline, width, duration','Environmental and cultural surveys for ROW corridor','Performance bond for restoration; annual rental based on land value'],
   },
   {
-    id: 'waterrights', phase: 'drilling', type: 'state',
-    name: 'Water Rights / Water Use Permit', icon: '💧',
-    agency: 'State Engineer / State Water Agency',
-    form: 'Varies by state',
-    cfr: 'State law (Prior Appropriation Doctrine)',
-    timeline: '6–24 months',
-    nepa: 'State SEPA may apply',
-    description: 'Geothermal operations commonly require water for drilling mud, well completion, and cooling. Western states operate under prior appropriation doctrine — water rights must be secured before use. Some states have specific geothermal fluid classification rules.',
-    requirements: [
-      'Apply to state engineer or water resources agency',
-      'Identify source, quantity, and purpose of water use',
-      'Prior appropriation: earlier filings have priority',
-      'Geothermal fluids may be classified separately from freshwater',
-      'Injection well water disposal may require separate authorization',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+    id:'gdp', phase:'drilling', type:'federal', icon:'⛏️',
+    name:'BLM Geothermal Drilling Permit (GDP)',
+    agency:'Bureau of Land Management — applicable Field Office',
+    form:'Form 3260-002',
+    citation:'43 CFR § 3261; 43 CFR Part 3260',
+    timeline:'90–365 days per well',
+    nepa:'EA or DNA required — NO Categorical Exclusion available for GDPs',
+    critical:true, waterFlag:false,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'Required for all geothermal drilling on BLM land across all 5 states. GDPs are explicitly NOT eligible for Categorical Exclusion — each requires at minimum an Environmental Assessment (EA). A DNA may apply for subsequent wells if a prior EA already contemplated them. The Plan of Operations is submitted concurrently.',
+    requirements:['Submit Form 3260-002 with well location, design, casing program','Plan of Operations (POO) concurrently — no separate form','NEPA: EA for first GDP; DNA for subsequent wells within prior EA scope','Blowout prevention specs, emergency response plan, reclamation bond'],
   },
   {
-    id: 'statedrill', phase: 'drilling', type: 'state',
-    name: 'State Drilling Permit', icon: '🏛️',
-    agency: 'State Oil, Gas & Geothermal Agency (varies)',
-    form: 'Varies: NV — NDEP; UT — UDOGM; OR — DOGAMI; CA — CalGEM',
-    cfr: 'State regulations',
-    timeline: '30–120 days',
-    nepa: 'State environmental review may apply',
-    description: 'In addition to the federal GDP, a state-level drilling permit is required in most western states. Each state has its own regulatory agency and requirements. Some states have streamlined coordination with BLM to reduce duplication.',
-    requirements: [
-      'Nevada: NDEP Division of Minerals (NRS 534A)',
-      'Utah: Utah Division of Oil, Gas & Mining (UDOGM)',
-      'Oregon: Oregon DOGAMI geothermal well permit',
-      'California: CalGEM (DOGGR) geothermal well permit',
-      'Well casing, cementing, and blowout prevention standards',
-      'Financial assurance / surety bond required',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+    id:'poo', phase:'drilling', type:'federal', icon:'📐',
+    name:'Plan of Operations (POO)',
+    agency:'Bureau of Land Management',
+    form:'Submitted with GDP — no separate form',
+    citation:'43 CFR § 3262',
+    timeline:'Reviewed concurrently with GDP',
+    nepa:'Covered by GDP NEPA',
+    critical:false, waterFlag:false,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'Site-specific management plan required alongside the GDP in all 5 states. Describes surface disturbance, equipment staging, access road use, spill prevention, and reclamation.',
+    requirements:['Drill site layout, access routes, staging areas, equipment list','Spill prevention and containment (SPCC compliance)','Waste/cuttings management plan; noxious weed plan; reclamation schedule'],
   },
   {
-    id: 'uwic', phase: 'drilling', type: 'env',
-    name: 'Underground Injection Control (UIC) Permit', icon: '🔄',
-    agency: 'EPA / State Primacy Agency',
-    form: 'EPA Form or State equivalent',
-    cfr: '40 CFR Parts 144–148 (SDWA)',
-    timeline: '6–18 months',
-    nepa: 'Federal permit triggers NEPA',
-    description: 'Required for all injection wells used for geothermal fluid reinjection. Geothermal injection wells are typically classified as Class V wells under the Underground Injection Control (UIC) program of the Safe Drinking Water Act.',
-    requirements: [
-      'Class V UIC permit for geothermal reinjection wells',
-      'Mechanical integrity testing of injection wells',
-      'Injection pressure, volume, and chemistry monitoring',
-      'Groundwater protection analysis required',
-      'Annual reporting to EPA or state primacy agency',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
-  },
-
-  // ── PHASE 4: CONSTRUCTION ──
-  {
-    id: 'cwa404', phase: 'construction', type: 'env',
-    name: 'CWA Section 404 Wetlands Permit', icon: '🌊',
-    agency: 'Army Corps of Engineers + EPA',
-    form: 'Individual Permit or Nationwide Permit (NWP)',
-    cfr: '33 CFR Parts 320–332',
-    timeline: '3–24 months (NWP faster)',
-    nepa: 'EIS may be required for individual permits',
-    description: 'Required if construction activities involve discharge of dredged or fill material into waters of the US, including wetlands. Many geothermal construction activities qualify for Nationwide Permits (NWPs) which are pre-approved for minimal impact activities.',
-    requirements: [
-      'Delineate all waters of the US within the project footprint',
-      'Nationwide Permit (NWP) for impacts under threshold limits',
-      'Individual permit for larger or more complex impacts',
-      'Mitigation required for unavoidable wetland impacts',
-      'Section 401 water quality certification from state required',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Construction_%26_Transportation'
+    id:'npdes_swppp', phase:'construction', type:'env', icon:'🌧️',
+    name:'NPDES Construction General Permit & SWPPP',
+    agency:'EPA / State environmental agency (varies by state)',
+    form:'Notice of Intent (NOI)',
+    citation:'40 CFR Part 122 (Clean Water Act § 402)',
+    timeline:'7 days after NOI (coverage near-automatic)',
+    nepa:'Not required',
+    critical:false, waterFlag:false,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'Required for construction disturbing ≥1 acre in all 5 states. Developer prepares a SWPPP and files an NOI before ground disturbance. Administered by: NDEP (NV), Utah DEQ (UT), Oregon DEQ (OR), California SWRCB (CA), CDPHE (CO).',
+    requirements:['Develop SWPPP before land disturbance','File NOI at least 7 days before construction start','Install and maintain BMPs; weekly inspections','File Notice of Termination (NOT) upon final stabilization'],
   },
   {
-    id: 'airpermit', phase: 'construction', type: 'env',
-    name: 'Air Quality Permit (CAA)', icon: '💨',
-    agency: 'State Air Quality Agency + EPA (for major sources)',
-    form: 'Varies by state',
-    cfr: '40 CFR Parts 51, 52, 70, 71',
-    timeline: '3–12 months',
-    nepa: 'State review',
-    description: 'Required for construction and operation of equipment that emits air pollutants. Geothermal power plants may emit H₂S, NCG (non-condensable gases), and particulates. Sources below major source thresholds may qualify for minor source permits.',
-    requirements: [
-      'Construction permit required before equipment installation',
-      'Operating permit required after commissioning',
-      'H₂S abatement systems typically required for flash plants',
-      'Particulate matter controls for construction-phase dust',
-      'Title V permit if major source thresholds exceeded',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+    id:'pou', phase:'utilization', type:'federal', icon:'⚡',
+    name:'BLM Plan of Utilization (POU) — Power Plant',
+    agency:'Bureau of Land Management',
+    form:'Submitted to BLM Field Office',
+    citation:'43 CFR §§ 3270–3274',
+    timeline:'12–36 months',
+    nepa:'Full EIS typically required',
+    critical:true, waterFlag:true,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'Required in all 5 states to authorize construction and operation of a geothermal power plant on a federal BLM lease. Triggers the most comprehensive NEPA review — typically a full EIS. Plant cooling water rights are a primary EIS issue.',
+    requirements:['Detailed facility design, site plan, construction schedule','Full EIS: scoping, alternatives, public comment (18–30 months typically)','Consumptive water rights for plant cooling must be secured','Transmission ROW; decommissioning financial assurance'],
   },
   {
-    id: 'roadaccess', phase: 'construction', type: 'federal',
-    name: 'Access Road / Transportation Permit', icon: '🚧',
-    agency: 'BLM / USFS / State DOT / County',
-    form: 'ROW application + county/state oversize load permits',
-    cfr: '43 CFR Part 2800',
-    timeline: '3–12 months',
-    nepa: 'Typically included in larger NEPA doc',
-    description: 'Road construction on federal land requires ROW authorization. Oversize and overweight loads for drilling rigs and turbines require state and county permits. Dust control on unpaved haul roads may require additional permits.',
-    requirements: [
-      'ROW grant from BLM/USFS for new road construction',
-      'County road use agreement for local roads',
-      'Oversize/overweight load permits from state DOT',
-      'Dust control plan for unpaved roads',
-      'Traffic impact study may be required',
-      'Road reclamation bond',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Construction_%26_Transportation'
-  },
-  {
-    id: 'swppp', phase: 'construction', type: 'env',
-    name: 'Stormwater Pollution Prevention Plan (SWPPP)', icon: '🌧️',
-    agency: 'EPA / State (NPDES Construction General Permit)',
-    form: 'Notice of Intent (NOI) to EPA eNOI system',
-    cfr: '40 CFR Part 122',
-    timeline: '7 days after NOI submittal',
-    nepa: 'Not required separately',
-    description: 'Required for construction projects disturbing ≥1 acre of land. Developer must obtain coverage under the NPDES Construction General Permit by filing a NOI and implementing a SWPPP before ground disturbance begins.',
-    requirements: [
-      'Develop SWPPP before any land disturbance',
-      'File eNOI with EPA (or state primacy agency) ≥7 days before construction',
-      'Install BMPs (silt fences, sediment basins, stabilized entrances)',
-      'Inspect BMPs weekly and after 0.5" rainfall events',
-      'File Notice of Termination (NOT) upon final stabilization',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
-  },
-  {
-    id: 'hazmat', phase: 'construction', type: 'env',
-    name: 'Hazardous Materials / SPCC Plan', icon: '⚠️',
-    agency: 'EPA + State environmental agency',
-    form: 'SPCC Plan (internal document, EPA-reviewed)',
-    cfr: '40 CFR Part 112 (SPCC); 40 CFR Part 264 (RCRA)',
-    timeline: '60 days before oil storage',
-    nepa: 'Not required',
-    description: 'Projects storing ≥1,320 gallons of oil in aggregate (or ≥660 gal in single container) above-ground must develop a Spill Prevention, Control & Countermeasure (SPCC) Plan. Drilling operations with chemical storage trigger RCRA hazardous waste requirements.',
-    requirements: [
-      'SPCC plan certified by PE if >10,000 gal storage',
-      'Secondary containment for all oil storage containers',
-      'Spill response equipment on site',
-      'Annual inspection and five-year PE review',
-      'RCRA: characterize and manage drilling waste properly',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
-  },
-
-  // ── PHASE 5: UTILIZATION / POWER PLANT ──
-  {
-    id: 'pou', phase: 'utilization', type: 'federal',
-    name: 'Plan of Utilization (POU)', icon: '⚡',
-    agency: 'Bureau of Land Management (BLM)',
-    form: 'Submitted to BLM — no standard federal form',
-    cfr: '43 CFR §§ 3270–3274',
-    timeline: '12–36 months',
-    nepa: 'Full EIS typically required',
-    description: 'Required to authorize construction and operation of a geothermal power plant and related infrastructure on federal lease. Triggers comprehensive NEPA review. Covers production wells, injection wells, pipelines, power plant, and transmission interconnect.',
-    requirements: [
-      'Detailed project description and site plan',
-      'Environmental studies (biological, cultural, visual, noise)',
-      'Engineering specifications for power plant and well field',
-      'Water management plan (including reinjection)',
-      'Transmission interconnection plan',
-      'Decommissioning and reclamation plan',
-      'Financial assurance (bond) for reclamation',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Federal/Power_Plant',
-    keylaw: '43 CFR Part 3270 — Utilization Operations'
-  },
-  {
-    id: 'ferc', phase: 'utilization', type: 'federal',
-    name: 'FERC Interconnection / Small Power Production', icon: '🔌',
-    agency: 'Federal Energy Regulatory Commission (FERC)',
-    form: 'FERC Form 556 (QF Certification) or interconnection application',
-    cfr: '18 CFR Parts 292, 292.203 (PURPA QF)',
-    timeline: '3–18 months',
-    nepa: 'FERC may conduct independent review',
-    description: 'Geothermal power plants connecting to the federal transmission grid must comply with FERC interconnection requirements. Qualifying Facility (QF) status under PURPA may provide favorable power purchase rights. Projects >20 MW require formal FERC filing.',
-    requirements: [
-      'QF Self-Certification (Form 556) for facilities ≤80 MW',
-      'Interconnection application to transmission owner',
-      'Feasibility, system impact, and facilities studies',
-      'Large Generator Interconnection Agreement (LGIA) for projects >20 MW',
-      'Market-based rate authorization if selling into wholesale market',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
-  },
-  {
-    id: 'sitelicense', phase: 'utilization', type: 'state',
-    name: 'Power Plant Site License / Certificate', icon: '🏭',
-    agency: 'State Public Utilities Commission or Energy Agency',
-    form: 'Varies by state — Application for Site Certificate (ASC)',
-    cfr: 'State law',
-    timeline: '12–36 months',
-    nepa: 'State SEPA required',
-    description: 'Most western states require a siting certificate or site license for power plants above a capacity threshold. This is typically the main state-level authorization for plant construction, triggering comprehensive state environmental review.',
-    requirements: [
-      'Nevada: PUCN Certificate of Public Convenience (for utility-scale)',
-      'Oregon: Energy Facility Siting Council (EFSC) Site Certificate (>25 MW)',
-      'Utah: Public Service Commission review',
-      'California: CEC certification for large plants (>50 MW)',
-      'State environmental impact review (state SEPA equivalent)',
-      'Public notice and comment period required',
-    ],
-    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal'
+    id:'ferc_qf', phase:'utilization', type:'federal', icon:'🔌',
+    name:'FERC QF Certification & Grid Interconnection',
+    agency:'Federal Energy Regulatory Commission (FERC)',
+    form:'Form 556 + LGIA',
+    citation:'18 CFR Part 292 (PURPA); 18 CFR Part 35',
+    timeline:'3–18 months',
+    nepa:'FERC independent review possible',
+    critical:false, waterFlag:false,
+    rapidUrl:'https://openei.org/wiki/RAPID/Geothermal',
+    description:'Plants ≤80 MW self-certify as QF via Form 556. Projects >20 MW must execute an LGIA with the applicable transmission owner. Applies to all 5 states connecting to the Western Interconnection.',
+    requirements:['File Form 556 self-certification (effective on filing — no approval needed)','Submit interconnection request to applicable Transmission Owner','Feasibility → System Impact → Facilities Study (queue position critical)','Execute Large Generator Interconnection Agreement (LGIA)'],
   },
 ];
 
+const STATE_PERMITS = {
+  Nevada: [
+    {
+      id:'nv_drill', phase:'drilling', type:'state', icon:'⛏️',
+      name:'Nevada Division of Minerals — Permit to Drill / Project Area Permit',
+      agency:'Nevada Division of Minerals (NDOM)',
+      form:'Permit to Drill or Geothermal Project Area Permit (NDOM online portal)',
+      citation:'NRS 534A; NAC 534A',
+      timeline:'60–90 days',
+      nepa:'No state environmental review; BLM will not issue GDP until NEPA complete',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Nevada',
+      description:'NDOM requires a permit before drilling any geothermal well, including exploratory wells. A Geothermal Project Area Permit covers all wells at a multi-well project under one review — the standard path for development projects. Nevada has no formal state environmental review for geothermal, but BLM will not issue a GDP without federal NEPA compliance.',
+      requirements:['Submit Permit to Drill application to NDOM with well location plat, drilling program, and equipment locations','For multi-well projects: Geothermal Project Area Permit covers all wells under one review','Fee based on acres used by the project','File Sundry Notice with NDOM for operational changes, flow tests, or routine maintenance','Some counties may require additional special permits'],
+    },
+    {
+      id:'nv_water', phase:'drilling', type:'state', icon:'💧',
+      name:'Nevada Division of Water Resources — Water Right Permit',
+      agency:'Nevada Division of Water Resources (NDWR) — State Engineer',
+      form:'Application to Appropriate Water or Report of Conveyance (purchase)',
+      citation:'NRS 533 (surface); NRS 534 (groundwater); NRS 534A.040',
+      timeline:'6–24 months (most NV water already appropriated — purchase typical)',
+      nepa:'State process',
+      critical:true, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Roadmap/19-NV-a',
+      description:'Nevada water law is prior appropriation and beneficial use. As a practical matter, most water in Nevada is already fully appropriated — developers typically need to purchase or lease existing water rights. Consumptive uses require appropriation unless water is fully reinjected in closed loop. NDWR is the key authority and must be consulted early. Purchased rights must be conveyed by deed and recorded with the county recorder.',
+      requirements:['File Application to Appropriate Water with NDWR if unappropriated water exists','For fully appropriated sources (typical): purchase or lease existing water right','Geothermal closed-loop reinjection exemption available under NRS 534A.040','File Report of Conveyance with NDWR when purchasing/leasing a right','Exploration drilling: apply for Temporary Use of Groundwater Waiver from NDWR'],
+    },
+    {
+      id:'nv_uic', phase:'construction', type:'env', icon:'🔄',
+      name:'NDEP Class V UIC Permit — Injection Wells',
+      agency:'Nevada Division of Environmental Protection (NDEP)',
+      form:'Class V UIC Application — NDEP Bureau of Waste Management',
+      citation:'40 CFR Part 144; NRS 445A; Nevada UIC Program',
+      timeline:'6–12 months',
+      nepa:'State permit',
+      critical:false, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Roadmap/14-NV-c',
+      description:'Nevada holds EPA primacy for Class V UIC — injection well permits are issued by NDEP (Bureau of Waste Management), not directly by EPA. Required for geothermal reinjection wells. NDEP contact: 775.687.9478.',
+      requirements:['Apply to NDEP Bureau of Waste Management for Class V UIC permit','Well construction design and casing specifications','Mechanical Integrity Test (MIT) before injection begins','Annual reporting to NDEP'],
+    },
+    {
+      id:'nv_pucn', phase:'utilization', type:'state', icon:'🏭',
+      name:'Public Utilities Commission of Nevada (PUCN) — CPCN',
+      agency:'Public Utilities Commission of Nevada (PUCN)',
+      form:'CPCN Application — PUCN',
+      citation:'NRS 704.020(2)(a); NRS 704.370; NAC 703.486',
+      timeline:'12–18 months',
+      nepa:'PUCN conducts independent environmental review',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Nevada/Power_Plant',
+      description:'Required in Nevada if the developer qualifies as a "public utility" and seeks to develop energy generation facilities. PUCN must hold a public hearing for utility CPCN applications. PUCN may approve or deny after environmental studies and hearing.',
+      requirements:['File CPCN application with PUCN — project description, need analysis, financial viability','PUCN public hearing required for utility applicants','Environmental studies must be completed before PUCN issues decision','PUCN may impose conditions or modifications on approval'],
+    },
+  ],
+
+  Utah: [
+    {
+      id:'ut_dwr_drill', phase:'drilling', type:'state', icon:'⛏️',
+      name:'Utah Division of Water Rights — Geothermal Well Permit',
+      agency:'Utah Division of Water Rights (DWR)',
+      form:'Notice of Intent + Application (UAC R655-1)',
+      citation:'Utah Code Ann. § 73-22-6; UAC R655-1',
+      timeline:'60–120 days',
+      nepa:'State review',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Utah',
+      description:'Utah DWR (not an oil & gas commission) regulates all geothermal wells where the resource exceeds 120°C. A Notice of Intent must be submitted to DWR before drilling, redrilling, deepening, or abandoning a well. Low-temperature resources (<120°C) do not require this permit.',
+      requirements:['Submit Notice of Intent to Utah DWR before any drilling, redrilling, deepening, or abandonment','Comply with drilling record and Plan of Operations requirements under R655-1','Low-temperature geothermal (<120°C): no DWR permit required','Temperature gradient wells: follow DWR-specific notification requirements'],
+    },
+    {
+      id:'ut_water_right', phase:'drilling', type:'state', icon:'💧',
+      name:'Utah Division of Water Rights — Permit to Appropriate Geothermal Fluids',
+      agency:'Utah Division of Water Rights (DWR)',
+      form:'Application to Appropriate Water (DWR)',
+      citation:'Utah Code Ann. § 73-22-8; Utah Geothermal Resource Conservation Act (UGRCA)',
+      timeline:'6–18 months',
+      nepa:'State process',
+      critical:true, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Utah/Land_Access',
+      description:'Under the UGRCA, geothermal fluids are classified as a special form of underground water. Any diversion and use requires a water right from DWR. This applies statewide regardless of land ownership — the developer cannot legally extract geothermal fluids without it. Prior appropriation governs.',
+      requirements:['File application with Utah DWR to appropriate geothermal fluids — mandatory before production','Prior appropriation: earlier filings have priority — file early to secure priority date','Utilization for thermal content plus reinjection recognized as beneficial use','Must be obtained before lawful extraction; must accompany BLM lease application'],
+    },
+    {
+      id:'ut_uic', phase:'construction', type:'env', icon:'🔄',
+      name:'Utah DEQ — Class V UIC Permit (Injection Wells)',
+      agency:'Utah Department of Environmental Quality (DEQ)',
+      form:'Class V UIC Application — Utah DEQ Division of Water Quality',
+      citation:'40 CFR Part 144; Utah Code § 19-5',
+      timeline:'6–12 months',
+      nepa:'State',
+      critical:false, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Utah',
+      description:'Utah holds EPA primacy for Class V UIC. Injection well permits for geothermal reinjection are issued by Utah DEQ Division of Water Quality. Mechanical integrity testing required before injection begins.',
+      requirements:['Apply to Utah DEQ Division of Water Quality — not EPA','Well construction and casing specifications','Mechanical Integrity Test (MIT) before injection begins','Annual reporting to Utah DEQ'],
+    },
+    {
+      id:'ut_psc', phase:'utilization', type:'state', icon:'🏭',
+      name:'Utah Public Service Commission — Certificate of Convenience & Necessity',
+      agency:'Utah Public Service Commission (PSC)',
+      form:'Application for Certificate of Convenience and Necessity',
+      citation:'Utah Code Ann. § 54-4-25',
+      timeline:'12–18 months',
+      nepa:'PSC reviews environmental impacts',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Utah',
+      description:'Utah requires a CCN from the Public Service Commission for public utility generating facilities. Required for geothermal power plants qualifying as public utilities above applicable capacity thresholds.',
+      requirements:['File CCN application with Utah PSC — project description, need analysis, financial assurance','PSC public hearing; intervenors may participate','Environmental assessment included with application','Coordinate timing with BLM POU EIS process'],
+    },
+  ],
+
+  Oregon: [
+    {
+      id:'or_dogami', phase:'drilling', type:'state', icon:'⛏️',
+      name:'DOGAMI Geothermal Well Permit',
+      agency:'Oregon Department of Geology and Mineral Industries (DOGAMI)',
+      form:'Geothermal Well Permit Application — DOGAMI Mineral Land Regulation & Reclamation',
+      citation:'ORS 522.125; ORS 522.135',
+      timeline:'60 days from complete application (statutory deadline)',
+      nepa:'No state NEPA; federal NEPA required for BLM land',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Oregon',
+      description:'Oregon DOGAMI regulates all geothermal well drilling. The permit covers commencement of drilling and related activities. DOGAMI distributes applications to counties and interested agencies (45-day comment period), then must issue or deny within 60 days of a complete application — one of the tightest state-level permitting windows in the 5-state region.',
+      requirements:['Submit Geothermal Well Permit Application to DOGAMI','DOGAMI distributes to county, geothermal heating districts, and interested agencies — 45-day comment period','DOGAMI must issue or deny within 60 days of complete application (statutory)','Notify DOGAMI before abandonment; file Plugging Record Form after abandonment'],
+    },
+    {
+      id:'or_water', phase:'drilling', type:'state', icon:'💧',
+      name:'Oregon Water Resources Department — Water Right Permit',
+      agency:'Oregon Water Resources Department (OWRD)',
+      form:'Application for Water Right Permit (OWRD)',
+      citation:'ORS 537; ORS 522',
+      timeline:'6–18 months',
+      nepa:'State review',
+      critical:true, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Oregon',
+      description:'Oregon follows prior appropriation for water. Geothermal developers need water rights from OWRD for consumptive uses including drilling water, plant cooling, and dust suppression. Eastern Oregon basins (primary geothermal resource areas) have experienced increasing scarcity and constraint.',
+      requirements:['File Application for Water Right with OWRD — source, quantity, point of diversion, place of use','Prior appropriation: earlier applications have priority','Geothermal reinjection to same formation may qualify for reduced permitting','Eastern Oregon basins: consult OWRD early for water availability assessment'],
+    },
+    {
+      id:'or_uic_wpcf', phase:'construction', type:'env', icon:'🔄',
+      name:'Oregon DEQ — Industrial WPCF Permit (Injection/UIC)',
+      agency:'Oregon Department of Environmental Quality (DEQ)',
+      form:'Industrial Individual Water Pollution Control Facility (WPCF) Permit',
+      citation:'ORS 468B; Oregon UIC Program',
+      timeline:'6–12 months',
+      nepa:'State',
+      critical:false, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Oregon',
+      description:'Oregon uses Industrial WPCF Permits (not standard EPA Class V UIC) for geothermal injection wells. Required for closed-loop systems, dewatering injection, and fluid recovery injection. Oregon DEQ holds primacy. Note: this applies even to closed-loop systems that might be exempt in other states.',
+      requirements:['Apply to Oregon DEQ for Industrial Individual WPCF Permit','Required for construction, operation, modification, or abandonment of injection wells','Well design specifications and groundwater protection analysis','Oregon-specific: applies to closed-loop systems — broader than other states'],
+    },
+    {
+      id:'or_efsc', phase:'utilization', type:'state', icon:'🏭',
+      name:'Oregon EFSC Site Certificate — Power Plant',
+      agency:'Oregon Energy Facility Siting Council (EFSC)',
+      form:'Notice of Intent + Application for Site Certificate',
+      citation:'ORS 469',
+      timeline:'18–36 months',
+      nepa:'EFSC conducts comprehensive state environmental review',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Oregon',
+      description:'Oregon requires an EFSC Site Certificate for power plants >35 MW. The process includes a Notice of Intent, comprehensive environmental review, public hearings, and a contested case procedure if objections are raised. It is the primary state authorization for a geothermal power plant in Oregon. Plants <35 MW subject to county land use requirements only.',
+      requirements:['File Notice of Intent with EFSC — preliminary project information','Submit Application for Site Certificate — extensive environmental and technical documentation','EFSC public hearing; contested case proceedings possible','EFSC issues Site Certificate with conditions; appealable','Plants <35 MW: county land use/building permits only — no EFSC jurisdiction'],
+    },
+  ],
+
+  California: [
+    {
+      id:'ca_ceqa', phase:'exploration', type:'env', icon:'🌿',
+      name:'California Environmental Quality Act (CEQA) Review',
+      agency:'CalGEM (lead agency) or County (if delegated)',
+      form:'Initial Study / EIR / Negative Declaration',
+      citation:'Cal. Pub. Res. Code §§ 21000–21177; CEQA Guidelines (14 CCR § 15000)',
+      timeline:'6–24 months depending on complexity',
+      nepa:'California mandatory state environmental review; distinct from federal NEPA',
+      critical:true, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/California_Environmental_Quality_Act',
+      description:'CEQA applies to all state and local agency approvals in California. Unlike NEPA, CEQA requires mitigation of significant impacts to the extent feasible — not just disclosure. Water availability and water quality are primary CEQA issues. CEQA has become the basis for frequent lawsuits. The CEC\'s AFC process for ≥50 MW plants is a certified CEQA program.',
+      requirements:['Lead agency (CalGEM or county) conducts Initial Study to determine CEQA document type','Significant impacts require Environmental Impact Report (EIR) — full public review','No significant impacts: Negative Declaration or Mitigated ND (faster)','Plan for potential third-party legal challenges — CEQA litigation is common in CA','Imperial County exception: county has CEQA authority for its projects (not CalGEM)'],
+    },
+    {
+      id:'ca_calgem', phase:'drilling', type:'state', icon:'⛏️',
+      name:'CalGEM — Notice of Intention & Well Operations Permit',
+      agency:'California Department of Conservation — Geologic Energy Management Division (CalGEM)',
+      form:'Notice of Intention to Commence Drilling (NOI) + Permit to Conduct Well Operations',
+      citation:'Cal. Pub. Res. Code § 3714; 14 CCR § 1722',
+      timeline:'30–90 days',
+      nepa:'CEQA required (CalGEM typically lead agency)',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/California/Exploration',
+      description:'CalGEM (formerly DOGGR) administers geothermal well drilling throughout California. A Notice of Intention (NOI) and Well Operations Permit are required before any drilling. CalGEM is actively revising California\'s geothermal regulations for the first time in 45+ years — monitor CalGEM rulemaking updates.',
+      requirements:['File NOI with CalGEM before commencing drilling','Obtain Permit to Conduct Well Operations from CalGEM','CEQA process: CalGEM as lead agency unless delegated to county','Monitor CalGEM geothermal rulemaking — active regulatory revision underway'],
+    },
+    {
+      id:'ca_water', phase:'drilling', type:'state', icon:'💧',
+      name:'California SWRCB — Water Right Permit',
+      agency:'California State Water Resources Control Board (SWRCB)',
+      form:'Application for Permit to Appropriate Water (eWRIMS)',
+      citation:'Cal. Water Code § 1200 et seq.',
+      timeline:'12–36 months',
+      nepa:'CEQA required',
+      critical:true, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/California',
+      description:'California water rights combine appropriative rights (SWRCB for surface water) and overlying rights with groundwater sustainability agency oversight under SGMA for groundwater. Projects in the Salton Sea corridor face severe constraints — the basin is critically overdrafted. SWRCB approval can take several years; specialized California water counsel is essential.',
+      requirements:['File Application to Appropriate Water via eWRIMS (SWRCB)','For groundwater: consult applicable Groundwater Sustainability Agency (GSA) under SGMA','Salton Sea region: coordinate with Imperial Irrigation District and CVWD','CEQA required for water right approval','Engage specialized California water rights counsel early'],
+    },
+    {
+      id:'ca_rwqcb_uic', phase:'construction', type:'env', icon:'🔄',
+      name:'Regional WQCB — Waste Discharge Requirements / UIC',
+      agency:'California Regional Water Quality Control Board (RWQCB) — applicable region',
+      form:'Report of Waste Discharge (WDR)',
+      citation:'Cal. Water Code § 13260; 40 CFR Part 144',
+      timeline:'6–12 months',
+      nepa:'CEQA',
+      critical:false, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/California',
+      description:'California RWQCBs issue Waste Discharge Requirements (WDRs) for geothermal injection operations under the state UIC program. The applicable RWQCB (e.g., Colorado River Basin RWQCB for Salton Sea area) sets injection conditions. California has EPA primacy.',
+      requirements:['File Report of Waste Discharge with applicable RWQCB (not EPA Region 9)','RWQCB issues WDRs — conditions for injection operations','Geothermal brine chemistry must be characterized','Annual monitoring and reporting to RWQCB'],
+    },
+    {
+      id:'ca_cec', phase:'utilization', type:'state', icon:'🏭',
+      name:'California Energy Commission — Application for Certification (AFC)',
+      agency:'California Energy Commission (CEC)',
+      form:'Application for Certification (AFC)',
+      citation:'Cal. Pub. Res. Code § 25522; § 25540.5',
+      timeline:'12–24 months',
+      nepa:'CEC AFC is a certified CEQA regulatory program',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/California/Power_Plant',
+      description:'CEC has exclusive jurisdiction over thermal power plants ≥50 MW and all dedicated related facilities. The AFC process is a certified CEQA program — CEC acts as CEQA lead and produces a functionally equivalent document instead of a standard EIR. CEC may delegate siting to counties with adopted geothermal elements in their general plans. Plants <50 MW subject to county jurisdiction only.',
+      requirements:['File AFC with CEC — detailed project description, environmental studies, engineering specs','CEC staff assessments and committee reports replace standard EIR','CEC coordinates with federal agencies to incorporate federal permit conditions','Public hearings; CEC issues or denies certification','Plants <50 MW: county land use requirements only — no CEC jurisdiction','Check whether applicable county has geothermal general plan element (delegation possible)'],
+    },
+  ],
+
+  Colorado: [
+    {
+      id:'co_rmp_co', phase:'exploration', type:'federal', icon:'🗺️',
+      name:'BLM RMP Conformance — Colorado Field Offices',
+      agency:'BLM — Colorado State Office (Grand Junction, White River, Royal Gorge FOs)',
+      form:'Internal BLM review',
+      citation:'43 CFR Part 1600; 2008 ROD (PGEIS)',
+      timeline:'1–3 months',
+      nepa:'Covered by 2008 PGEIS if within ROD area',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Colorado/Land_Use',
+      description:'Colorado has three primary BLM Field Offices with geothermal leasing authority: Grand Junction FO, White River FO, and Royal Gorge FO. Confirm which FO manages the specific parcel and which RMP applies. Most western Colorado parcels fall within the 2008 ROD area and do not require RMP amendment.',
+      requirements:['Identify applicable Colorado BLM Field Office (Grand Junction, White River, or Royal Gorge)','Confirm parcel is within 2008 ROD area — required before lease nomination','Review for Colorado-specific lease stipulations (sage-grouse protections, water quality)'],
+    },
+    {
+      id:'co_cdwr_use', phase:'drilling', type:'state', icon:'💧',
+      name:'CDWR Geothermal Fluid Use Permit / Water Court Decree',
+      agency:'Colorado Division of Water Resources (CDWR) — State Engineer',
+      form:'Form GWS-45; Colorado Water Court Application (if tributary)',
+      citation:'C.R.S. § 37-90.5-107; 2 CCR 402-10; C.R.S. § 37-92 (Water Court)',
+      timeline:'6 months–3 years (water court adjudication if tributary)',
+      nepa:'State process',
+      critical:true, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Colorado/Water_Access_%26_Rights',
+      description:'Colorado\'s prior appropriation doctrine governs all water. A CDWR Use Permit is required to appropriate geothermal fluids unless the operation is fully closed-loop and the State Engineer waives the requirement as nonconsumptive. If the fluid is tributary groundwater (Colorado\'s default), a formal water court decree is also required — potentially adding 1–3 years. CDWR consultation must begin before any other permits are initiated.',
+      requirements:['Submit Form GWS-45 to CDWR — well location, depth, use type','CDWR determines tributary vs. nontributary (all water presumed tributary unless designated)','If tributary: water right adjudicated in Water Court (C.R.S. § 37-92) — can take 1–3 years','If nontributary: CDWR permit under C.R.S. § 37-90-137 (faster path)','Closed-loop EGS: apply to CDWR for nonconsumptive use waiver','ECMC Operations Permit cannot issue until water rights are resolved'],
+    },
+    {
+      id:'co_ecmc', phase:'drilling', type:'state', icon:'🏛️',
+      name:'Colorado ECMC Geothermal Operations Permit (Deep >2,500 ft)',
+      agency:'Colorado Energy and Carbon Management Commission (ECMC)',
+      form:'Form GWS-45 / ECMC 1300 Series Rules',
+      citation:'C.R.S. § 37-90.5-106(1)(b)(I); 2 CCR 402-10:6; ECMC Rule 1300',
+      timeline:'3–6 months (after water rights secured)',
+      nepa:'ECMC environmental review; mandatory public comment',
+      critical:true, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Colorado/Drilling_%26_Well_Development',
+      description:'ECMC issues Operations Permits for deep geothermal operations (>2,500 ft or associated with nontributary groundwater) under its 1300 Series rules. The permit cannot issue until water rights are secured (unless waived). ECMC requires mandatory community notification and public comment. ECMC and CDWR coordinate their review processes.',
+      requirements:['Water rights must be secured (or nonconsumptive waiver granted) BEFORE ECMC issues Operations Permit','Submit application with well location, depth, casing design, and fluid disposal plan','Mandatory notification to surface owners, adjacent landowners, and local government','ECMC public comment period; formal hearing if objections received','ECMC and CDWR coordinate review — single coordinated permitting process where possible'],
+    },
+    {
+      id:'co_uic_epa', phase:'construction', type:'env', icon:'🔄',
+      name:'EPA Region 8 — Class V UIC Permit (Injection Wells)',
+      agency:'U.S. Environmental Protection Agency — Region 8 (Denver)',
+      form:'EPA Class V UIC Permit Application — EPA Region 8',
+      citation:'40 C.F.R. §§ 144.6(e), 144.81(11); Safe Drinking Water Act',
+      timeline:'6–18 months',
+      nepa:'Federal permit triggers NEPA review',
+      critical:false, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Roadmap/14-CO-c',
+      description:'Colorado does NOT have EPA primacy for Class V UIC — unlike Nevada, Utah, Oregon, and California. Therefore, EPA Region 8 (Denver office) directly regulates all Class V injection wells in Colorado, including geothermal reinjection wells on federal land. This is a common source of confusion for developers working across multiple western states.',
+      requirements:['Apply to EPA Region 8 (Denver) — NOT to CDPHE — for Class V UIC permit','Well construction design and specifications; MIT before injection begins','Groundwater monitoring plan; annual reporting to EPA Region 8','Note: Colorado is the only state in the 5-state region without UIC primacy'],
+    },
+    {
+      id:'co_air_cdphe', phase:'construction', type:'env', icon:'💨',
+      name:'Colorado CDPHE APCD — Air Quality Construction Permit',
+      agency:'Colorado CDPHE — Air Pollution Control Division (APCD)',
+      form:'Air Permit Application — CDPHE APCD (303-692-3100)',
+      citation:'C.R.S. § 25-7; 40 CFR Parts 51–52',
+      timeline:'3–12 months',
+      nepa:'Addressed in BLM EA/EIS',
+      critical:false, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Roadmap/15-CO-a',
+      description:'Required before constructing or operating any stationary air emission source in Colorado. Sources include drilling rigs, power plant turbines, and H₂S abatement systems. If actual emissions exceed major-source thresholds, a Title V Operating Permit is also required.',
+      requirements:['Submit application to CDPHE APCD (303-692-3100)','Quantify emissions: NOx, PM10, PM2.5, VOCs, H₂S','H₂S abatement required if flash steam; binary cycle plants emit far less','Construction dust control plan required (PM10 is sensitive in Colorado)','Title V Operating Permit if >100 tons/yr of any criteria pollutant'],
+    },
+    {
+      id:'co_cpuc', phase:'utilization', type:'state', icon:'🏭',
+      name:'Colorado Public Utilities Commission — CPCN',
+      agency:'Colorado Public Utilities Commission (CPUC)',
+      form:'CPCN Application — Colorado PUC',
+      citation:'C.R.S. § 40-5-101; 4 CCR 723-3-3205',
+      timeline:'12–24 months',
+      nepa:'State PUC environmental review',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Colorado/Power_Plant',
+      description:'Required in Colorado for geothermal power plants >10 MW qualifying as a "public utility" under C.R.S. § 40-1-103. Rural electric cooperative projects entirely within their certificated area are exempt. CPUC confirms the project is needed and that costs and impacts are appropriate.',
+      requirements:['File CPCN application with Colorado PUC — project description, need analysis, rate impact','CPUC public intervenor process; utilities and consumer advocates may participate','Environmental and financial viability analysis required','Coordinate with BLM POU EIS timeline; rural electric cooperative exemption may apply'],
+    },
+  ],
+};
+
+function getPermitsForState(state) {
+  const statePerms = STATE_PERMITS[state] || [];
+  return [...FEDERAL_PERMITS, ...statePerms];
+}
+
 // ═══════════════════════════════════════
-// STATE
+// ACTIVE STATE & FILTERS
 // ═══════════════════════════════════════
+let activeState = 'Colorado';
 let activePhase = 'all';
-let activeType = 'all';
+let activeType  = 'all';
+
+function changeState(state) {
+  activeState = state;
+  activePhase = 'all';
+  activeType  = 'all';
+  // Reset phase tabs
+  document.querySelectorAll('.phase-card').forEach(c => c.classList.remove('active'));
+  document.querySelector('.phase-card').classList.add('active');
+  // Reset type filters
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector('.filter-btn').classList.add('active');
+  // Update sidebar jurisdiction highlight
+  updateJurisdictionSidebar(state);
+  renderPermits();
+}
+
+function updateJurisdictionSidebar(state) {
+  document.querySelectorAll('.jx-item').forEach(item => {
+    const name = item.querySelector('.jx-name')?.textContent?.trim();
+    item.style.borderColor = name === state ? 'rgba(124,111,247,0.5)' : 'var(--border)';
+    item.style.background  = name === state ? 'rgba(124,111,247,0.06)' : 'var(--surface2)';
+  });
+}
 
 // ═══════════════════════════════════════
 // RENDER PERMITS
 // ═══════════════════════════════════════
 function renderPermits() {
-  const list = document.getElementById('permitList');
+  const list    = document.getElementById('permitList');
   const countEl = document.getElementById('permitCount');
+  const statEl  = document.getElementById('statPermitCount');
 
-  const filtered = PERMITS.filter(p => {
+  const allForState = getPermitsForState(activeState);
+
+  const filtered = allForState.filter(p => {
     const phaseMatch = activePhase === 'all' || p.phase === activePhase;
-    const typeMatch = activeType === 'all' || p.type === activeType;
+    const typeMatch  = activeType  === 'all' || p.type  === activeType;
     return phaseMatch && typeMatch;
   });
 
   countEl.textContent = filtered.length + ' PERMITS';
+  if (statEl) statEl.textContent = allForState.length + '+';
+
+  // Update phase tab counts
+  const phaseCounts = {};
+  allForState.forEach(p => { phaseCounts[p.phase] = (phaseCounts[p.phase] || 0) + 1; });
+  document.querySelectorAll('.phase-card').forEach(card => {
+    const phaseVal = card.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+    if (phaseVal && phaseVal !== 'all') {
+      const countEl = card.querySelector('.phase-count');
+      if (countEl) countEl.textContent = (phaseCounts[phaseVal] || 0) + ' permits';
+    } else if (phaseVal === 'all') {
+      const countEl = card.querySelector('.phase-count');
+      if (countEl) countEl.textContent = allForState.length + ' permits';
+    }
+  });
 
   list.innerHTML = filtered.map(p => `
     <div class="permit-row" onclick="openDrawer('${p.id}')">
-      <div class="permit-icon icon-${p.type}">${p.icon}</div>
+      <div class="permit-icon icon-${p.type}">${p.icon || (p.type === 'federal' ? '📋' : p.type === 'state' ? '🏛️' : '🌿')}</div>
       <div class="permit-info">
-        <div class="permit-name">${p.name}</div>
+        <div class="permit-name">${p.critical ? '⚡ ' : ''}${p.waterFlag ? '💧 ' : ''}${p.name}</div>
         <div class="permit-agency">${p.agency}</div>
         ${p.form ? `<div class="permit-form">${p.form}</div>` : ''}
       </div>
       <div class="permit-meta">
         <div class="permit-timeline">⏱ ${p.timeline}</div>
         <div class="permit-tag tag-${p.type}">${p.type.toUpperCase()}</div>
+        ${p.critical ? `<div class="permit-tag tag-state" style="background:rgba(124,111,247,0.1);color:var(--fervo2);border-color:rgba(124,111,247,.25);margin-top:2px;">CRITICAL</div>` : ''}
       </div>
     </div>
   `).join('');
@@ -1307,13 +1388,20 @@ function filterType(type, el) {
 // DRAWER
 // ═══════════════════════════════════════
 function openDrawer(id) {
-  const p = PERMITS.find(x => x.id === id);
+  const allForState = getPermitsForState(activeState);
+  const p = allForState.find(x => x.id === id);
   if (!p) return;
 
-  const phaseLabels = { exploration: 'Phase 1 — Exploration', leasing: 'Phase 2 — Leasing', drilling: 'Phase 3 — Drilling', construction: 'Phase 4 — Construction', utilization: 'Phase 5 — Utilization' };
+  const phaseLabels = {
+    exploration: 'Phase 1 — Exploration & Planning',
+    leasing:     'Phase 2 — Leasing & Land Access',
+    drilling:    'Phase 3 — Drilling & Well Development',
+    construction:'Phase 4 — Construction & Environmental',
+    utilization: 'Phase 5 — Power Plant & Utilization',
+  };
 
-  document.getElementById('dPhase').textContent = phaseLabels[p.phase] || p.phase;
-  document.getElementById('dTitle').textContent = p.name;
+  document.getElementById('dPhase').textContent  = phaseLabels[p.phase] || p.phase;
+  document.getElementById('dTitle').textContent  = p.name;
   document.getElementById('dAgency').textContent = p.agency;
 
   document.getElementById('drawerContent').innerHTML = `
@@ -1330,25 +1418,22 @@ function openDrawer(id) {
         <div class="drawer-meta-label">Form / Filing</div>
         <div class="drawer-meta-value">${p.form}</div>
       </div>` : ''}
-      ${p.cfr ? `<div class="drawer-meta-item">
-        <div class="drawer-meta-label">Regulation (CFR)</div>
-        <div class="drawer-meta-value">${p.cfr}</div>
+      ${p.citation ? `<div class="drawer-meta-item">
+        <div class="drawer-meta-label">Legal Citation</div>
+        <div class="drawer-meta-value">${p.citation}</div>
       </div>` : ''}
     </div>
 
+    ${p.waterFlag ? `<div style="background:rgba(91,173,255,0.08);border:1px solid rgba(91,173,255,0.3);border-left:3px solid var(--sky);border-radius:0 5px 5px 0;padding:10px 14px;margin:14px 0;font-family:var(--mono);font-size:11px;color:var(--sky);line-height:1.5;">${p.waterNote || '💧 This permit has a direct water availability dependency.'}</div>` : ''}
+
     <div class="drawer-section">
       <div class="drawer-section-title">Overview</div>
-      <div class="drawer-body">${p.description}</div>
+      <div class="drawer-body">${p.description || p.desc || ''}</div>
     </div>
 
     ${p.requirements ? `<div class="drawer-section">
       <div class="drawer-section-title">Key Requirements</div>
       <div class="req-list">${p.requirements.map(r => `<div class="req-item">${r}</div>`).join('')}</div>
-    </div>` : ''}
-
-    ${p.keylaw ? `<div class="drawer-section">
-      <div class="drawer-section-title">Governing Law</div>
-      <div class="drawer-body">${p.keylaw}</div>
     </div>` : ''}
 
     <div class="drawer-section">
@@ -1374,6 +1459,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(
 
 // Init
 renderPermits();
+updateJurisdictionSidebar('Colorado');
 </script>
 </body>
 </html>
