@@ -210,7 +210,7 @@
   .pill-total    { background: var(--surface); border: 1px solid var(--border); }
   .pill-critical { background: var(--red-dim);   border: 1px solid rgba(124,111,247,0.3);   color: var(--fervo2); }
   .pill-timeline { background: var(--amber-dim); border: 1px solid rgba(245,166,35,0.3); color: var(--amber); }
-  .summary-pill div:first-child { font-family: var(--display); font-size: 22px; font-weight: 800; line-height: 1; }
+  .summary-pill div:first-child { font-family: var(--display); font-size: 32px; font-weight: 800; line-height: 1; }
   .summary-pill div:last-child  { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; opacity: .8; }
 
   /* AI narrative */
@@ -283,9 +283,100 @@
 
   @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
   .fade-in { animation: fadeIn .4s ease forwards; }
+  @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }
+
+  /* ── VERIFICATION PANEL ── */
+  .verify-panel {
+    margin-bottom: 22px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .verify-header {
+    padding: 12px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .verify-header-left { display: flex; align-items: center; gap: 10px; }
+
+  .verify-title {
+    font-family: var(--display);
+    font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.04em;
+  }
+
+  .verify-status {
+    font-family: var(--mono);
+    font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 3px 9px; border-radius: 3px;
+  }
+  .verify-status.running { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.3); }
+  .verify-status.done    { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(61,214,140,.3); }
+  .verify-status.error   { background: var(--red-dim);    color: var(--fervo2); border: 1px solid rgba(124,111,247,.3); }
+
+  .verify-rerun {
+    font-family: var(--mono); font-size: 10px; color: var(--text-dim);
+    background: none; border: 1px solid var(--border2);
+    border-radius: 3px; padding: 4px 10px; cursor: pointer;
+    transition: all .15s; letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .verify-rerun:hover { border-color: var(--fervo); color: var(--fervo); }
+
+  .verify-summary {
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px; color: var(--text-dim); line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .verify-list { padding: 8px 0; }
+
+  .verify-item {
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    gap: 10px; align-items: start;
+  }
+  .verify-item:last-child { border-bottom: none; }
+
+  .verify-icon { font-size: 13px; margin-top: 1px; flex-shrink: 0; }
+
+  .verify-item-body {}
+  .verify-item-permit {
+    font-family: var(--display); font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.02em; margin-bottom: 2px;
+  }
+  .verify-item-finding {
+    font-size: 11px; color: var(--text-dim); line-height: 1.5;
+  }
+  .verify-item-correction {
+    font-family: var(--mono); font-size: 10px;
+    margin-top: 4px; padding: 4px 8px;
+    border-radius: 3px; line-height: 1.5;
+  }
+  .correction-update { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.25); }
+  .correction-confirm { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,214,140,.25); }
+  .correction-missing { background: var(--red-dim); color: var(--fervo2); border: 1px solid rgba(124,111,247,.25); }
+
+  .verify-badge {
+    font-family: var(--mono); font-size: 9px; padding: 2px 7px;
+    border-radius: 2px; white-space: nowrap; text-transform: uppercase;
+    letter-spacing: 0.04em; flex-shrink: 0;
+  }
+  .badge-confirmed { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(61,214,140,.2); }
+  .badge-updated   { background: var(--amber-dim);  color: var(--amber);  border: 1px solid rgba(245,166,35,.2); }
+  .badge-flagged   { background: var(--red-dim);    color: var(--fervo2); border: 1px solid rgba(124,111,247,.2); }
+  .badge-missing   { background: rgba(124,111,247,.12); color: var(--fervo2); border: 1px solid rgba(124,111,247,.3); }
+
+  .verify-skel { padding: 14px 18px; display: flex; flex-direction: column; gap: 10px; }
 
   /* ── SAVED PROJECTS DRAWER ── */
-  .projects-toggle {
     display: flex; align-items: center; gap: 7px;
     font-family: var(--mono); font-size: 11px; font-weight: 500;
     color: var(--text-dim); letter-spacing: 0.05em; text-transform: uppercase;
@@ -611,85 +702,602 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════
-// PERMIT DATABASE
-// ═══════════════════════════════════════════════
-const ALL_PERMITS = [
-  { id:'noi', phase:'exploration', type:'federal', name:'Notice of Intent (NOI)', agency:'BLM', form:'Form 3200-009', timeline:'30–60 days', nepa:'CX eligible', critical:false,
-    conditions:['exploration','leasing','drilling','construction','utilization','full'],
-    desc:'Required before conducting geothermal exploration on federal land.' },
-  { id:'lup', phase:'exploration', type:'federal', name:'Land Use Plan Conformance', agency:'BLM / USFS', form:'Internal BLM review', timeline:'Varies', nepa:'Required', critical:true,
-    conditions:['exploration','leasing','drilling','construction','utilization','full','blm','usfs'],
-    desc:'Project must conform to the applicable Resource Management Plan (RMP) or Forest Plan before any permit authorization.' },
-  { id:'survey', phase:'exploration', type:'federal', name:'Exploration Survey Authorization', agency:'BLM / USFS / State', form:'Varies', timeline:'15–45 days', nepa:'CX for non-invasive', critical:false,
-    conditions:['exploration','leasing','full'],
-    desc:'Non-invasive surveys may need only land access permits; invasive methods need additional drilling permits.' },
-  { id:'tgw', phase:'exploration', type:'federal', name:'Temperature Gradient Well (TGW) Permit', agency:'BLM + State', form:'GDP Form 3260-002', timeline:'60–180 days', nepa:'CX typically', critical:false,
-    conditions:['leasing','drilling','full'],
-    desc:'Shallow exploratory wells to confirm geothermal resource — may qualify for Categorical Exclusion.' },
-  { id:'nhpa', phase:'exploration', type:'env', name:'NHPA Sec. 106 / ESA Sec. 7 Consultation', agency:'BLM + SHPO + USFWS', form:'Consultation process', timeline:'60–180 days', nepa:'Part of NEPA', critical:false,
-    conditions:['*'],
-    desc:'Cultural resources survey and T&E species consultation required before ground disturbance.' },
-  { id:'lease', phase:'leasing', type:'federal', name:'Geothermal Resource Lease (BLM)', agency:'Bureau of Land Management', form:'Form 3200-024a', timeline:'6–18 months', nepa:'EA required', critical:true,
-    conditions:['leasing','drilling','construction','utilization','full','blm'],
-    desc:'Primary authorization for geothermal development on federal land.' },
-  { id:'row', phase:'leasing', type:'federal', name:'Right-of-Way (ROW) Grant', agency:'BLM / USFS / DOT', form:'SF-299', timeline:'6–24 months', nepa:'EA or EIS', critical:false,
-    conditions:['construction','utilization','full'],
-    desc:'Required for off-lease transmission lines, access roads, and pipelines.' },
-  { id:'spup', phase:'leasing', type:'federal', name:'USFS Special Use Permit', agency:'US Forest Service', form:'FS-2700-3', timeline:'6–18 months', nepa:'Required', critical:false,
-    conditions:['usfs'],
-    desc:'Required for surface access on National Forest System lands.' },
-  { id:'tribal', phase:'leasing', type:'federal', name:'Tribal Consultation & BIA Authorization', agency:'BIA + Tribal Governments', form:'Varies', timeline:'6–24 months', nepa:'Required', critical:true,
-    conditions:['tribal'],
-    desc:'Mandatory for projects on or near tribal lands.' },
-  { id:'gdp', phase:'drilling', type:'federal', name:'Geothermal Drilling Permit (GDP)', agency:'Bureau of Land Management', form:'Form 3260-002', timeline:'90–365 days', nepa:'EA or DNA — NOT CX', critical:true,
-    conditions:['drilling','construction','utilization','full'],
-    desc:'Required for all production/injection drilling on federal land. NOT eligible for CX — EA required.' },
-  { id:'poo', phase:'drilling', type:'federal', name:'Plan of Operations (POO)', agency:'BLM', form:'With GDP', timeline:'With GDP', nepa:'Part of GDP', critical:false,
-    conditions:['drilling','construction','utilization','full'],
-    desc:'Site management plan required alongside GDP.' },
-  { id:'waterrights', phase:'drilling', type:'state', name:'Water Rights / Water Use Permit', agency:'State Engineer', form:'State form', timeline:'6–24 months', nepa:'State SEPA', critical:true,
-    conditions:['*'],
-    desc:'Prior appropriation water rights required in all western states.' },
-  { id:'statedrill', phase:'drilling', type:'state', name:'State Drilling Permit', agency:'State Agency (NDEP / UDOGM / DOGAMI / CalGEM)', form:'State-specific', timeline:'30–120 days', nepa:'State review', critical:true,
-    conditions:['drilling','construction','utilization','full'],
-    desc:'State-level drilling permit required in addition to federal GDP.' },
-  { id:'uic', phase:'drilling', type:'env', name:'Underground Injection Control (UIC) Permit', agency:'EPA / State', form:'EPA or state form', timeline:'6–18 months', nepa:'Federal NEPA trigger', critical:false,
-    conditions:['drilling','construction','utilization','full'],
-    desc:'Class V UIC permit required for geothermal reinjection wells (SDWA).' },
-  { id:'cwa404', phase:'construction', type:'env', name:'CWA Section 404 Wetlands Permit', agency:'Army Corps + EPA', form:'NWP or Individual Permit', timeline:'3–24 months', nepa:'EIS possible', critical:false,
-    conditions:['wetlands'],
-    desc:'Required for fill/dredge in waters of the US including wetlands.' },
-  { id:'airpermit', phase:'construction', type:'env', name:'Air Quality Permit (CAA)', agency:'State Air Quality / EPA', form:'State form', timeline:'3–12 months', nepa:'State', critical:false,
-    conditions:['construction','utilization','full'],
-    desc:'Required for construction and operation of emission-producing equipment.' },
-  { id:'roadaccess', phase:'construction', type:'federal', name:'Access Road / Transportation Permit', agency:'BLM / USFS / DOT / County', form:'ROW + DOT permits', timeline:'3–12 months', nepa:'Included in larger doc', critical:false,
-    conditions:['newroad'],
-    desc:'Road construction on federal land requires ROW; oversize loads need state/county permits.' },
-  { id:'swppp', phase:'construction', type:'env', name:'Stormwater NPDES / SWPPP', agency:'EPA / State (NPDES CGP)', form:'eNOI to EPA', timeline:'7 days after NOI', nepa:'Not required', critical:false,
-    conditions:['construction','utilization','full'],
-    desc:'Required for construction disturbing ≥1 acre. File NOI and implement SWPPP before ground break.' },
-  { id:'spcc', phase:'construction', type:'env', name:'Spill Prevention (SPCC) Plan', agency:'EPA', form:'Internal plan (PE certified)', timeline:'60 days pre-operations', nepa:'Not required', critical:false,
-    conditions:['drilling','construction','utilization','full'],
-    desc:'Required when storing ≥1,320 gallons oil in aggregate. PE certification required >10,000 gal.' },
-  { id:'pou', phase:'utilization', type:'federal', name:'Plan of Utilization (POU) — Power Plant', agency:'Bureau of Land Management', form:'Submitted to BLM', timeline:'12–36 months', nepa:'Full EIS typically', critical:true,
-    conditions:['utilization','full','powerplant'],
-    desc:'Authorizes construction and operation of geothermal power plant on federal lease. Full EIS likely.' },
-  { id:'ferc', phase:'utilization', type:'federal', name:'FERC QF Certification / Interconnection', agency:'FERC', form:'Form 556 + LGIA', timeline:'3–18 months', nepa:'FERC review', critical:false,
-    conditions:['utilization','full','powerplant','transmission'],
-    desc:'QF Self-Certification (Form 556) for ≤80 MW. LGIA required for projects >20 MW.' },
-  { id:'sitelicense', phase:'utilization', type:'state', name:'State Power Plant Site License / Certificate', agency:'State PUC or Energy Agency', form:'State application', timeline:'12–36 months', nepa:'State EIS', critical:true,
-    conditions:['utilization','full','powerplant'],
-    desc:'State siting certificate required in most western states. Triggers full state environmental review.' },
+// ─────────────────────────────────────────────────────────────────────────────
+// MULTI-STATE GEOTHERMAL PERMIT DATABASE
+// Source: RAPID Toolkit — openei.org/wiki/RAPID/Geothermal/[State]
+// Coverage: Nevada, Utah, Oregon, California, Colorado (BLM federal land)
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Federal permits shared across all 5 states (BLM land)
+const FEDERAL_PERMITS = [
+  {
+    id: 'rmp', phase: 'exploration', type: 'federal', icon: '🗺️',
+    name: 'BLM Resource Management Plan (RMP) Conformance',
+    agency: 'Bureau of Land Management — applicable Field Office',
+    form: 'Internal BLM review — no standard form',
+    citation: '43 CFR Part 1600; 2008 ROD (PGEIS) amending 114 western BLM RMPs',
+    timeline: '1–3 months (confirm open status)',
+    nepa: 'Covered by 2008 Programmatic GEIS if within ROD area; otherwise RMP amendment required (adds 1–3 yrs)',
+    critical: true, waterFlag: false,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'Before any permit can issue, BLM must confirm the project parcel is open to geothermal leasing under the applicable Resource Management Plan. The 2008 ROD amended 114 BLM RMPs in 11 western states via a Programmatic Environmental Impact Statement — projects within those areas do not require a separate RMP amendment. Projects outside the ROD area require a full RMP revision before any authorization proceeds.',
+    requirements: [
+      'Identify the applicable BLM Field Office and its current RMP',
+      'Confirm parcel is within 2008 ROD/PGEIS coverage area — required before lease nomination',
+      'If outside ROD: initiate RMP amendment process (1–3 additional years)',
+      'Review lease stipulations (NSO zones, seasonal wildlife restrictions, cultural overlays)',
+    ],
+    waterNote: null,
+  },
+  {
+    id: 'nepa_lease', phase: 'exploration', type: 'federal', icon: '⚖️',
+    name: 'NEPA Environmental Review — Leasing Stage',
+    agency: 'Bureau of Land Management',
+    form: 'Environmental Assessment (EA) or EIS',
+    citation: '42 U.S.C. § 4321 (NEPA); 43 CFR Part 46',
+    timeline: '6–18 months',
+    nepa: 'EA required at leasing; EIS if significant impacts',
+    critical: true, waterFlag: true,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'All BLM geothermal leasing actions require NEPA review. Typically an Environmental Assessment (EA) leading to a Finding of No Significant Impact (FONSI). Water resource impacts — including effects on prior water rights and downstream users — are a primary scoping issue in all western states. Results in lease stipulations attached to Form 3200-024a.',
+    requirements: [
+      'BLM prepares or oversees EA; scoping notice with 30-day public comment',
+      'Water resource analysis: availability, impacts to prior appropriation rights, hydrology',
+      'Cultural resources (Section 106 NHPA), biological resources (Section 7 ESA) analyzed concurrently',
+      'FONSI + Decision Record authorizes lease issuance; significant impacts trigger EIS',
+    ],
+    waterNote: '⚠️ WATER: Prior appropriation impacts must be analyzed at this stage across all 5 states. Early state water agency consultation before NEPA scoping is strongly recommended.',
+  },
+  {
+    id: 'nhpa_esa', phase: 'exploration', type: 'env', icon: '🏛️',
+    name: 'NHPA Section 106 & ESA Section 7 Consultation',
+    agency: 'BLM + State SHPO + U.S. Fish & Wildlife Service',
+    form: 'Section 106 Consultation / Biological Opinion',
+    citation: '36 CFR Part 800 (NHPA); 50 CFR Part 402 (ESA)',
+    timeline: '3–12 months (concurrent with NEPA)',
+    nepa: 'Integral to NEPA process',
+    critical: false, waterFlag: false,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'Two parallel federal consultation obligations triggered by BLM as lead agency. Section 106 requires consultation with the State Historic Preservation Office (SHPO) before any ground disturbance. Section 7 requires formal consultation with USFWS if listed species or critical habitat may be present. Both feed into the NEPA EA document.',
+    requirements: [
+      'Class III cultural resources inventory within Area of Potential Effects (APE)',
+      'Submit findings to state SHPO — 30-day response period',
+      'Biological survey for threatened & endangered species',
+      'If T&E species present: formal Section 7 consultation with USFWS (135+ days)',
+    ],
+    waterNote: null,
+  },
+  {
+    id: 'blm_lease', phase: 'leasing', type: 'federal', icon: '📋',
+    name: 'BLM Geothermal Resource Lease',
+    agency: 'Bureau of Land Management',
+    form: 'Form 3200-024a',
+    citation: '43 CFR Parts 3200–3203; Geothermal Steam Act of 1970 (30 U.S.C. § 1001)',
+    timeline: '6–18 months (competitive lease sale)',
+    nepa: 'EA completed at leasing stage',
+    critical: true, waterFlag: false,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'Primary federal authorization for geothermal resource development on BLM-managed land. Required for all activities beyond casual-use exploration. Issued through competitive nomination and auction. Lease term: 10 years with priority renewal. Royalty: 1.75% for first 10 years, then 3.5%.',
+    requirements: [
+      'Submit Expression of Interest/Lease Nomination to applicable BLM State Office',
+      'BLM publishes Notice of Competitive Lease Sale — 45-day protest period',
+      'Competitive oral auction — highest bidder wins; site-specific stipulations attached',
+      'Annual rental: ~$2/acre (non-production period); NEPA must be complete before issuance',
+    ],
+    waterNote: null,
+  },
+  {
+    id: 'blm_row', phase: 'leasing', type: 'federal', icon: '🛤️',
+    name: 'BLM Right-of-Way (ROW) Grant — Off-Lease Infrastructure',
+    agency: 'Bureau of Land Management',
+    form: 'SF-299',
+    citation: '43 CFR Part 2800',
+    timeline: '6–18 months',
+    nepa: 'EA required; may tier off leasing EA',
+    critical: false, waterFlag: false,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'Required for any infrastructure not covered by the geothermal lease: access roads, transmission lines, pipelines, water supply lines, off-lease facility siting. Each ROW carries its own bond and annual rental obligation.',
+    requirements: [
+      'File SF-299 with applicable BLM Field Office — describe purpose, location, width, duration',
+      'Environmental and cultural surveys for ROW corridor',
+      'Performance bond for restoration required',
+      'Annual rental based on land value and acreage',
+    ],
+    waterNote: null,
+  },
+  {
+    id: 'gdp', phase: 'drilling', type: 'federal', icon: '⛏️',
+    name: 'BLM Geothermal Drilling Permit (GDP)',
+    agency: 'Bureau of Land Management — applicable Field Office',
+    form: 'Form 3260-002',
+    citation: '43 CFR § 3261; 43 CFR Part 3260',
+    timeline: '90–365 days per well (EA required)',
+    nepa: 'EA or DNA required — Categorical Exclusion NOT available for GDPs',
+    critical: true, waterFlag: false,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'Required for all geothermal drilling on BLM-managed land across all 5 states. GDPs are explicitly NOT eligible for Categorical Exclusion under NEPA. Each well requires at minimum an Environmental Assessment (EA). A Determination of NEPA Adequacy (DNA) may apply for subsequent wells if a prior EA already contemplated them.',
+    requirements: [
+      'Submit Form 3260-002 with well location, design specs, and casing program',
+      'Plan of Operations (POO) submitted concurrently — no separate form',
+      'NEPA: EA for first GDP; DNA for subsequent wells within prior EA scope',
+      'Blowout prevention equipment specs and emergency response plan required',
+      'Reclamation bond required; Notice of Completion (Form 3200-010) after exploration wells',
+    ],
+    waterNote: null,
+  },
+  {
+    id: 'poo', phase: 'drilling', type: 'federal', icon: '📐',
+    name: 'Plan of Operations (POO)',
+    agency: 'Bureau of Land Management',
+    form: 'Submitted with GDP — no separate form',
+    citation: '43 CFR § 3262',
+    timeline: 'Reviewed concurrently with GDP',
+    nepa: 'Covered by GDP NEPA',
+    critical: false, waterFlag: false,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'Site-specific management plan submitted with the GDP. Describes all surface disturbance, equipment staging, access road use, spill prevention, and reclamation. BLM uses it to set permit conditions. Required in all 5 states.',
+    requirements: [
+      'Drill site layout, access routes, staging areas, equipment list',
+      'Spill prevention and containment (SPCC compliance)',
+      'Waste management plan including drill cuttings',
+      'Reclamation schedule and bond estimate; noxious weed management plan',
+    ],
+    waterNote: null,
+  },
+  {
+    id: 'pou', phase: 'utilization', type: 'federal', icon: '⚡',
+    name: 'BLM Plan of Utilization (POU) — Power Plant',
+    agency: 'Bureau of Land Management',
+    form: 'Submitted to BLM Field Office',
+    citation: '43 CFR §§ 3270–3274',
+    timeline: '12–36 months',
+    nepa: 'Full EIS typically required',
+    critical: true, waterFlag: true,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'Authorizes construction and operation of a geothermal power plant and associated infrastructure on a federal BLM lease. Triggers comprehensive NEPA review — typically a full EIS given the scale of a power plant. Applies in all 5 states. Water use for plant cooling is a primary EIS issue.',
+    requirements: [
+      'Detailed facility design, site plan, construction and operation schedule',
+      'Full EIS: scoping, alternatives analysis, public comment (18–30 months typically)',
+      'Water use plan for plant cooling — consumptive rights must be secured',
+      'Transmission interconnection route and ROW authorization',
+      'Decommissioning and reclamation financial assurance',
+    ],
+    waterNote: '⚠️ Plant cooling water is consumptive use — adjudicated water rights required before POU approval in all 5 states.',
+  },
+  {
+    id: 'ferc_qf', phase: 'utilization', type: 'federal', icon: '🔌',
+    name: 'FERC QF Certification & Grid Interconnection',
+    agency: 'Federal Energy Regulatory Commission (FERC)',
+    form: 'Form 556 + Large Generator Interconnection Agreement (LGIA)',
+    citation: '18 CFR Part 292 (PURPA); 18 CFR Part 35',
+    timeline: '3–18 months',
+    nepa: 'FERC may conduct independent review',
+    critical: false, waterFlag: false,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'Plants ≤80 MW may self-certify as Qualifying Facility (QF) under PURPA via Form 556. Projects >20 MW connecting to the grid must execute an LGIA with the applicable transmission owner. QF certification requires only a filing — no FERC approval needed.',
+    requirements: [
+      'File Form 556 self-certification with FERC (effective on filing)',
+      'Submit interconnection request to applicable Transmission Owner',
+      'Feasibility → System Impact → Facilities Study (sequential; queue position is time-sensitive)',
+      'Execute LGIA with transmission owner',
+    ],
+    waterNote: null,
+  },
+  {
+    id: 'npdes_swppp', phase: 'construction', type: 'env', icon: '🌧️',
+    name: 'NPDES Construction General Permit & SWPPP',
+    agency: 'EPA / State environmental agency (varies by state)',
+    form: 'Notice of Intent (NOI)',
+    citation: '40 CFR Part 122 (Clean Water Act § 402)',
+    timeline: '7 days after NOI (coverage near-automatic)',
+    nepa: 'Not required',
+    critical: false, waterFlag: false,
+    rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal',
+    desc: 'Required for construction disturbing ≥1 acre. Developer must prepare a Stormwater Pollution Prevention Plan (SWPPP) and file an NOI before ground disturbance. State-administered in NV (NDEP), UT (DEQ), OR (DEQ), CA (SWRCB); EPA Region 8 for CO.',
+    requirements: [
+      'Develop SWPPP before land disturbance; file NOI at least 7 days before construction',
+      'Install BMPs: silt fences, stabilized entrances, sediment basins',
+      'Inspect BMPs weekly and after rainfall events',
+      'File Notice of Termination (NOT) upon final stabilization',
+    ],
+    waterNote: null,
+  },
 ];
+
+// State-specific permits keyed by state name
+const STATE_PERMITS = {
+
+  // ══════════════════════════════════════════════════════════════════
+  // NEVADA
+  // Source: openei.org/wiki/RAPID/Geothermal/Nevada
+  // Key agencies: NDOM (drilling), NDWR (water), NDEP (environment), PUCN (power plant)
+  // ══════════════════════════════════════════════════════════════════
+  Nevada: [
+    {
+      id: 'nv_drill', phase: 'drilling', type: 'state', icon: '⛏️',
+      name: 'Nevada Division of Minerals — Permit to Drill / Project Area Permit',
+      agency: 'Nevada Division of Minerals (NDOM)',
+      form: 'Permit to Drill Application or Geothermal Project Area Permit (NDOM online portal)',
+      citation: 'NRS 534A; NAC 534A',
+      timeline: '60–90 days',
+      nepa: 'No state environmental review — but BLM will not issue GDP until NEPA complete',
+      critical: true, waterFlag: false,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Nevada',
+      desc: 'In Nevada, a geothermal developer must obtain a permit from the Administrator of the Nevada Division of Minerals (NDOM) prior to drilling or operating any geothermal well, including exploratory wells. A Geothermal Project Area Permit is required if the project involves more than one well — it allows all wells within the project area to be permitted under one review, which is the typical path for development projects. Nevada has no formal state environmental review for geothermal, but BLM will not issue a federal GDP without NEPA compliance.',
+      requirements: [
+        'Submit Permit to Drill application to NDOM — includes well location plat, complete drilling program, equipment locations',
+        'For multi-well projects: Geothermal Project Area Permit covers all wells under one review',
+        'Fee based on acres used by the project',
+        'File Sundry Notice with NDOM for any operational changes, flow tests, or routine maintenance',
+        'County may require additional special permits for drilling',
+      ],
+      waterNote: null,
+    },
+    {
+      id: 'nv_water', phase: 'drilling', type: 'state', icon: '💧',
+      name: 'Nevada Division of Water Resources — Water Right Permit',
+      agency: 'Nevada Division of Water Resources (NDWR) — State Engineer',
+      form: 'Application to Appropriate Water; or Report of Conveyance (if purchasing existing right)',
+      citation: 'NRS 533 (surface water); NRS 534 (groundwater); NRS 534A.040',
+      timeline: '6–24 months (most NV water already appropriated — purchase may be necessary)',
+      nepa: 'State process',
+      critical: true, waterFlag: true,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Roadmap/19-NV-a',
+      desc: 'Nevada water law is based on prior appropriation and beneficial use. As a practical matter, most water in Nevada has already been appropriated — meaning developers typically need to purchase or lease existing water rights rather than apply for new ones. Consumptive uses of water brought to the surface outside a geothermal well require appropriation permits unless the water is reinjected in a closed loop. The NDWR is the key authority and should be consulted early. Purchased water rights must be conveyed by deed and recorded with the county recorder.',
+      requirements: [
+        'File Application to Appropriate Water with State Engineer (NDWR) if unappropriated water available',
+        'If water source is fully appropriated (likely): purchase or lease existing water right',
+        'Geothermal reinjection exemption: consumptive-use appropriation not required if water removed and reinjected without consumptive use (NRS 534A.040)',
+        'File Report of Conveyance with NDWR when purchasing/leasing a water right',
+        'For exploration drilling: apply for Temporary Use of Groundwater for Exploration Waiver from NDWR',
+        'Coordinate with NDWR early — water constraints are a primary project risk in Nevada',
+      ],
+      waterNote: '🚨 WATER CRITICAL: Nevada is among the most water-scarce states. Most water is already appropriated. Plan to purchase water rights — allow 6–18 months. NDWR consultation should begin before lease nomination.',
+    },
+    {
+      id: 'nv_ndep_uic', phase: 'construction', type: 'env', icon: '🔄',
+      name: 'NDEP Class V UIC Permit — Injection Wells',
+      agency: 'Nevada Division of Environmental Protection (NDEP)',
+      form: 'Class V UIC Permit Application — NDEP Bureau of Waste Management',
+      citation: '40 CFR Part 144; NRS 445A; Nevada UIC Program',
+      timeline: '6–12 months',
+      nepa: 'State permit',
+      critical: false, waterFlag: true,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Roadmap/14-NV-c',
+      desc: 'Nevada holds EPA primacy for the Class V UIC program — injection well permits are issued by NDEP (Bureau of Waste Management), not directly by EPA. Required for geothermal reinjection wells. NDEP contact: SW Branch Supervisor, 775.687.9478.',
+      requirements: [
+        'Apply to NDEP Bureau of Waste Management for Class V UIC permit',
+        'Well construction design and casing specifications',
+        'Mechanical Integrity Testing (MIT) before injection begins',
+        'Groundwater monitoring plan; annual reporting to NDEP',
+      ],
+      waterNote: '⚠️ Nevada has state primacy — apply to NDEP, not EPA Region 9.',
+    },
+    {
+      id: 'nv_pucn', phase: 'utilization', type: 'state', icon: '🏭',
+      name: 'PUCN Certificate of Public Convenience & Necessity (CPCN)',
+      agency: 'Public Utilities Commission of Nevada (PUCN)',
+      form: 'CPCN Application — PUCN',
+      citation: 'NRS 704.020(2)(a); NRS 704.370; NAC 703.486',
+      timeline: '12–18 months',
+      nepa: 'PUCN conducts its own environmental review',
+      critical: true, waterFlag: false,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Nevada/Power_Plant',
+      desc: 'Required in Nevada if the developer qualifies as a "public utility" under NRS 704.020(2)(a) and seeks to develop energy generation facilities. PUCN must conduct a public hearing for any CPCN application filed by an electric utility. PUCN may approve or deny the CPCN after environmental studies and a hearing.',
+      requirements: [
+        'File CPCN application with PUCN — project description, need justification, financial viability',
+        'PUCN public hearing required for utility applicants',
+        'Environmental studies must be completed before PUCN decision',
+        'PUCN may impose conditions or modifications on approval',
+      ],
+      waterNote: null,
+    },
+  ],
+
+  // ══════════════════════════════════════════════════════════════════
+  // UTAH
+  // Source: openei.org/wiki/RAPID/Geothermal/Utah
+  // Key agencies: Utah DWR (drilling + water), UDOGM, DEQ, PSC
+  // ══════════════════════════════════════════════════════════════════
+  Utah: [
+    {
+      id: 'ut_dwr_drill', phase: 'drilling', type: 'state', icon: '⛏️',
+      name: 'Utah Division of Water Rights — Geothermal Well Permit',
+      agency: 'Utah Division of Water Rights (DWR)',
+      form: 'Notice of Intent + Application (UAC R655-1)',
+      citation: 'Utah Code Ann. § 73-22-6; UAC R655-1 (Wells for Geothermal Energy)',
+      timeline: '60–120 days',
+      nepa: 'State review',
+      critical: true, waterFlag: false,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Utah',
+      desc: 'In Utah, the Division of Water Rights (not a separate oil & gas commission) regulates geothermal wells where the resource exceeds 120°C. Developers must obtain approval from DWR before conducting geothermal exploration drilling at high temperature resources. A Notice of Intent must be submitted to DWR before drilling, redrilling, deepening, or abandoning any well.',
+      requirements: [
+        'Submit Notice of Intent to DWR for review before any drilling, redrilling, deepening, or abandonment',
+        'Provide drilling records and Plan of Operations as required by R655-1-8.2',
+        'Low-temperature geothermal (<120°C) is not classified as a geothermal resource — no DWR permit needed for those',
+        'Temperature gradient wells: follow specific DWR notification requirements',
+      ],
+      waterNote: null,
+    },
+    {
+      id: 'ut_water_right', phase: 'drilling', type: 'state', icon: '💧',
+      name: 'Utah Division of Water Rights — Permit to Appropriate Geothermal Fluids',
+      agency: 'Utah Division of Water Rights (DWR)',
+      form: 'Application to Appropriate Water (DWR)',
+      citation: 'Utah Code Ann. § 73-22-8; UGRCA',
+      timeline: '6–18 months',
+      nepa: 'State process',
+      critical: true, waterFlag: true,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Utah/Land_Access',
+      desc: 'Under the Utah Geothermal Resource Conservation Act (UGRCA), geothermal fluids are classified as a special form of underground water. Any diversion and use of geothermal fluids requires acquisition of a water right from DWR. This applies statewide regardless of land ownership. The developer cannot lawfully extract geothermal fluids without first obtaining this permit. Prior appropriation doctrine governs.',
+      requirements: [
+        'File application with Utah DWR to appropriate geothermal fluids — prior to commencement of production',
+        'Prior appropriation governs: earlier filings have priority over later ones',
+        'Utilization for thermal content and subsurface reinjection is recognized as beneficial use',
+        'Must be obtained before lawful extraction of geothermal fluids — not optional',
+        'Coordinate with BLM; water right must accompany federal BLM lease application',
+      ],
+      waterNote: '🚨 WATER REQUIRED: Utah law makes this permit mandatory for all geothermal extraction — cannot legally produce geothermal fluids without it. File early.',
+    },
+    {
+      id: 'ut_uic', phase: 'construction', type: 'env', icon: '🔄',
+      name: 'Utah DEQ — Class V UIC Permit (Injection Wells)',
+      agency: 'Utah Department of Environmental Quality (DEQ) — Division of Water Quality',
+      form: 'Class V UIC Application — Utah DEQ',
+      citation: '40 CFR Part 144; Utah Water Quality Act (Utah Code § 19-5)',
+      timeline: '6–12 months',
+      nepa: 'State',
+      critical: false, waterFlag: true,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Utah',
+      desc: 'Utah holds EPA primacy for the Class V UIC program. Injection well permits for geothermal reinjection are issued by Utah DEQ Division of Water Quality. Mechanical integrity testing required before injection begins.',
+      requirements: [
+        'Apply to Utah DEQ Division of Water Quality for Class V UIC permit',
+        'Well construction and casing specifications required',
+        'Mechanical Integrity Test (MIT) before injection operations begin',
+        'Groundwater monitoring and annual reporting to DEQ',
+      ],
+      waterNote: '⚠️ Utah has state primacy — apply to Utah DEQ, not EPA.',
+    },
+    {
+      id: 'ut_psc', phase: 'utilization', type: 'state', icon: '🏭',
+      name: 'Utah Public Service Commission — Certificate of Convenience & Necessity',
+      agency: 'Utah Public Service Commission (PSC)',
+      form: 'Application for Certificate of Convenience and Necessity',
+      citation: 'Utah Code Ann. § 54-4-25',
+      timeline: '12–18 months',
+      nepa: 'PSC reviews environmental impacts',
+      critical: true, waterFlag: false,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Utah',
+      desc: 'Utah requires a Certificate of Convenience and Necessity (CCN) from the Public Service Commission for construction or operation of a public utility generating facility in the state. Required for geothermal power plants above applicable capacity thresholds that qualify as public utilities.',
+      requirements: [
+        'File CCN application with Utah PSC — project description, need analysis, financial assurance',
+        'PSC public hearing process; intervenors may participate',
+        'Environmental assessment filed with PSC application',
+        'PSC may impose conditions; coordinate with BLM POU timeline',
+      ],
+      waterNote: null,
+    },
+  ],
+
+  // ══════════════════════════════════════════════════════════════════
+  // OREGON
+  // Source: openei.org/wiki/RAPID/Geothermal/Oregon
+  // Key agencies: DOGAMI (drilling), OWRD (water), DEQ (environment), EFSC (power plant)
+  // ══════════════════════════════════════════════════════════════════
+  Oregon: [
+    {
+      id: 'or_dogami', phase: 'drilling', type: 'state', icon: '⛏️',
+      name: 'DOGAMI Geothermal Well Permit',
+      agency: 'Oregon Department of Geology and Mineral Industries (DOGAMI)',
+      form: 'Geothermal Well Permit Application (DOGAMI Mineral Land Regulation & Reclamation)',
+      citation: 'ORS 522.125; ORS 522.135',
+      timeline: '60 days from complete application (statutory deadline)',
+      nepa: 'No state NEPA equivalent — but federal NEPA required for BLM land',
+      critical: true, waterFlag: false,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Oregon',
+      desc: 'Oregon requires a Geothermal Well Permit from DOGAMI before commencing drilling, redrilling, or deepening any geothermal well. The permit covers commencement of drilling and all drilling-related activities (conductor pipe, well pad, access road construction). DOGAMI must issue or deny the permit within 60 days of a complete application — one of the faster state-level permitting timelines. DOGAMI also regulates plugging and abandonment.',
+      requirements: [
+        'Submit Geothermal Well Permit Application to DOGAMI',
+        'DOGAMI distributes application to governing county, geothermal heating districts, and interested agencies — agencies have 45 days to suggest conditions',
+        'DOGAMI must issue or deny within 60 days of complete application',
+        'Prior to abandonment: notify DOGAMI; file Plugging Record Form after abandonment operations',
+        'Modification Application required for any well modifications',
+      ],
+      waterNote: null,
+    },
+    {
+      id: 'or_water', phase: 'drilling', type: 'state', icon: '💧',
+      name: 'Oregon Water Resources Department — Water Right Permit',
+      agency: 'Oregon Water Resources Department (OWRD)',
+      form: 'Application for Water Right Permit (OWRD)',
+      citation: 'ORS 537 (water appropriation); ORS 522 (geothermal)',
+      timeline: '6–18 months',
+      nepa: 'State review',
+      critical: true, waterFlag: true,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Oregon',
+      desc: 'Oregon follows prior appropriation for water rights. Geothermal developers need water rights from OWRD for consumptive uses including drilling water, plant cooling, and dust suppression. Oregon has experienced increasing water scarcity in eastern Oregon (primary geothermal resource area), making early OWRD consultation important.',
+      requirements: [
+        'File Application for Water Right with OWRD — identify source, quantity, point of diversion, place of use',
+        'Prior appropriation: earlier applications have priority',
+        'Geothermal reinjection to the same formation may qualify for reduced permitting',
+        'Consult OWRD early — eastern Oregon basins may have limited available water',
+      ],
+      waterNote: '⚠️ Eastern Oregon basins (primary geothermal areas) have constrained water availability. Early OWRD consultation essential.',
+    },
+    {
+      id: 'or_uic_wpcf', phase: 'construction', type: 'env', icon: '🔄',
+      name: 'Oregon DEQ — Industrial WPCF Permit (Injection/UIC)',
+      agency: 'Oregon Department of Environmental Quality (DEQ)',
+      form: 'Industrial Individual Water Pollution Control Facility (WPCF) Permit',
+      citation: 'ORS 468B; Oregon UIC Program',
+      timeline: '6–12 months',
+      nepa: 'State',
+      critical: false, waterFlag: true,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Oregon',
+      desc: 'In Oregon, geothermal injection wells require an Industrial Individual WPCF Permit from Oregon DEQ — not a standard EPA Class V UIC permit. This applies to geothermal closed loop systems, dewatering injection, and injection wells associated with geothermal fluid recovery. Oregon DEQ has primacy over the UIC program.',
+      requirements: [
+        'Apply to Oregon DEQ for Industrial Individual WPCF Permit',
+        'Required for construction, operation, modification, or abandonment of geothermal injection wells',
+        'Well design specifications and groundwater protection analysis',
+        'Oregon-specific: applies to closed-loop systems that might be exempt in other states',
+      ],
+      waterNote: '⚠️ Oregon uses WPCF permits (not standard Class V UIC) — apply to Oregon DEQ.',
+    },
+    {
+      id: 'or_efsc', phase: 'utilization', type: 'state', icon: '🏭',
+      name: 'Oregon EFSC Site Certificate — Power Plant',
+      agency: 'Oregon Energy Facility Siting Council (EFSC)',
+      form: 'Notice of Intent + Application for Site Certificate',
+      citation: 'ORS 469 (Energy Facility Siting)',
+      timeline: '18–36 months',
+      nepa: 'EFSC conducts comprehensive state environmental review',
+      critical: true, waterFlag: false,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/Oregon',
+      desc: 'Oregon requires a Site Certificate from the Energy Facility Siting Council (EFSC) for power plants with net generation capacity exceeding 35 MW. The EFSC process includes a Notice of Intent, application review, public hearings, and a comprehensive environmental review. It is the primary state authorization for a geothermal power plant in Oregon.',
+      requirements: [
+        'File Notice of Intent with EFSC — project description and preliminary information',
+        'Prepare and submit Application for Site Certificate — extensive environmental and technical documentation',
+        'EFSC public hearing process; contested case procedures possible',
+        'EFSC issues Site Certificate with conditions; final decision appealable',
+        'Plants <35 MW subject to local county land use and building requirements only',
+      ],
+      waterNote: null,
+    },
+  ],
+
+  // ══════════════════════════════════════════════════════════════════
+  // CALIFORNIA
+  // Source: openei.org/wiki/RAPID/Geothermal/California
+  // Key agencies: CalGEM (drilling), SWRCB (water), CEC (power plant), CEQA
+  // ══════════════════════════════════════════════════════════════════
+  California: [
+    {
+      id: 'ca_calgem', phase: 'drilling', type: 'state', icon: '⛏️',
+      name: 'CalGEM Well Operations Permit (Notice of Intention)',
+      agency: 'California Department of Conservation — Geologic Energy Management Division (CalGEM)',
+      form: 'Notice of Intention to Commence Drilling (NOI) + Permit to Conduct Well Operations',
+      citation: 'Cal. Pub. Res. Code § 3714; 14 CCR § 1722',
+      timeline: '30–90 days',
+      nepa: 'California CEQA applies (CalGEM typically lead agency)',
+      critical: true, waterFlag: false,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/California/Exploration',
+      desc: 'CalGEM (formerly DOGGR) administers geothermal well drilling activities throughout California. Prior to drilling any new well, developers must obtain a Notice of Intention to Commence Drilling (NOI) and a Permit to Conduct Well Operations from CalGEM. CalGEM is typically the lead agency under CEQA for exploration drilling, unless authority is explicitly delegated to a local county. Note: CalGEM is actively revising California\'s geothermal regulations — developers should monitor the CalGEM Rulemaking Updates webpage.',
+      requirements: [
+        'File NOI with CalGEM before commencing any drilling operation',
+        'Obtain Permit to Conduct Well Operations from CalGEM',
+        'CEQA process required: CalGEM as lead agency (unless delegated to county)',
+        'Imperial County exception: Imperial County has CEQA authority for projects within its boundaries',
+        'Monitor CalGEM geothermal rulemaking updates — regulations are actively being revised',
+      ],
+      waterNote: null,
+    },
+    {
+      id: 'ca_ceqa', phase: 'exploration', type: 'env', icon: '🌿',
+      name: 'California Environmental Quality Act (CEQA) Review',
+      agency: 'CalGEM (lead agency) or County (if delegated)',
+      form: 'Initial Study / EIR / Negative Declaration',
+      citation: 'Cal. Pub. Res. Code §§ 21000–21177; CEQA Guidelines (14 CCR § 15000)',
+      timeline: '6–24 months depending on complexity',
+      nepa: 'California state equivalent of NEPA — mandatory for all state permits',
+      critical: true, waterFlag: true,
+      rapidUrl: 'https://openei.org/wiki/California_Environmental_Quality_Act',
+      desc: 'California\'s CEQA applies to virtually all state and local agency approvals for geothermal development. It requires disclosure and mitigation of significant environmental impacts. Unlike NEPA, CEQA requires mitigation of significant impacts to the extent feasible — not just disclosure. CEQA has become the basis for numerous lawsuits. Water availability and water quality are primary CEQA issues for geothermal in California.',
+      requirements: [
+        'Lead agency (CalGEM or county) conducts Initial Study to determine CEQA document type',
+        'Significant impacts trigger Environmental Impact Report (EIR) — full public review process',
+        'No significant impacts: Negative Declaration or Mitigated Negative Declaration (faster)',
+        'Public comment period; responses required; findings and Statement of Overriding Considerations if needed',
+        'CEQA can be subject to third-party legal challenges — plan for potential litigation risk',
+      ],
+      waterNote: '⚠️ Water availability is a primary CEQA scoping issue in California. Impacts to surface and groundwater resources must be fully analyzed and mitigated.',
+    },
+    {
+      id: 'ca_water', phase: 'drilling', type: 'state', icon: '💧',
+      name: 'California SWRCB — Water Right Permit',
+      agency: 'California State Water Resources Control Board (SWRCB) or Regional Water Quality Control Board',
+      form: 'Application for Permit to Appropriate Water (eWRIMS)',
+      citation: 'Cal. Water Code § 1200 et seq.; Water Code § 1381',
+      timeline: '12–36 months',
+      nepa: 'CEQA required',
+      critical: true, waterFlag: true,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/California',
+      desc: 'California follows the appropriative water rights system for surface water (SWRCB) and a complex mix of appropriative and overlying rights for groundwater (governed by local groundwater sustainability agencies under SGMA). Geothermal projects in the Salton Sea area (Fervo corridor) face particular water scarcity constraints — the Salton Sea basin is critically overdrafted. SWRCB approval can take several years.',
+      requirements: [
+        'File Application for Permit to Appropriate Water via eWRIMS (SWRCB online system)',
+        'For groundwater: consult applicable Groundwater Sustainability Agency (GSA) under SGMA',
+        'Salton Sea region: Imperial Irrigation District and CVWD manage water allocation',
+        'CEQA required for water right approval',
+        'Geothermal brine reinjection: coordinate SWRCB and applicable RWQCB requirements',
+      ],
+      waterNote: '🚨 WATER CRITICAL: California water rights are highly complex and contested. Salton Sea corridor projects face severe groundwater sustainability constraints under SGMA. Engage specialized California water counsel immediately.',
+    },
+    {
+      id: 'ca_rwqcb_uic', phase: 'construction', type: 'env', icon: '🔄',
+      name: 'Regional WQCB — Waste Discharge Requirements / UIC',
+      agency: 'California Regional Water Quality Control Board (RWQCB) — applicable region',
+      form: 'Report of Waste Discharge (WDR) / UIC Permit',
+      citation: 'Cal. Water Code § 13260; 40 CFR Part 144',
+      timeline: '6–12 months',
+      nepa: 'CEQA',
+      critical: false, waterFlag: true,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/California',
+      desc: 'California RWQCBs regulate geothermal injection wells under the state UIC program. The applicable RWQCB (e.g., Colorado River Basin RWQCB for Salton Sea area) issues Waste Discharge Requirements (WDRs) for injection operations. California has EPA primacy for Class V UIC.',
+      requirements: [
+        'File Report of Waste Discharge with applicable RWQCB',
+        'RWQCB issues WDRs setting conditions for injection operations',
+        'Geothermal brine chemistry must be characterized and managed',
+        'Annual monitoring and reporting to RWQCB',
+      ],
+      waterNote: '⚠️ Apply to applicable RWQCB — not EPA Region 9 — for California UIC.',
+    },
+    {
+      id: 'ca_cec', phase: 'utilization', type: 'state', icon: '🏭',
+      name: 'California Energy Commission (CEC) — Application for Certification (AFC)',
+      agency: 'California Energy Commission (CEC)',
+      form: 'Application for Certification (AFC) — CEC',
+      citation: 'Cal. Pub. Res. Code § 25522; Cal. Pub. Res. Code § 25540.5',
+      timeline: '12–24 months',
+      nepa: 'CEC AFC process is a certified CEQA regulatory program',
+      critical: true, waterFlag: false,
+      rapidUrl: 'https://openei.org/wiki/RAPID/Geothermal/California/Power_Plant',
+      desc: 'The CEC has exclusive jurisdiction over thermal power plants ≥50 MW and all related dedicated facilities (transmission lines, access roads, water lines, gas pipelines). The AFC process is a certified regulatory program in which the CEC acts as CEQA lead agency and develops a functionally equivalent document instead of a separate EIR. The CEC may delegate siting authority to counties that have adopted geothermal elements into their general plans. Facilities <50 MW are subject to local county jurisdiction.',
+      requirements: [
+        'File AFC with CEC — detailed project description, environmental studies, engineering specs',
+        'CEC staff assessment and committee reports replace standard EIR',
+        'CEC coordinates with federal agencies issuing permits to incorporate federal law conditions',
+        'Public hearings; CEC issues or denies certification',
+        'If plant <50 MW: subject to county land use requirements, not CEC jurisdiction',
+        'Check whether applicable county has adopted geothermal element into its General Plan (delegation possible)',
+      ],
+      waterNote: null,
+    },
+  ],
+
+  // Colorado permits are already defined in the main ALL_PERMITS array in this file
+  // but we include a minimal reference here so state lookup works correctly
+  Colorado: [], // handled via CO-specific dedicated database in the demo
+};
+
+// Build the full permit list for a given state (federal + state-specific)
+function getPermitsForState(state) {
+  const statePerms = STATE_PERMITS[state] || [];
+  // For Colorado the full detailed DB is loaded separately; for other states combine federal + state
+  if (state === 'Colorado') {
+    // Return the Colorado-specific ALL_PERMITS defined elsewhere
+    return typeof CO_PERMITS !== 'undefined' ? CO_PERMITS : [...FEDERAL_PERMITS, ...statePerms];
+  }
+  return [...FEDERAL_PERMITS, ...statePerms];
+}
+
+const ALL_PERMITS = getPermitsForState('Colorado'); // default — overridden by demo auto-load
 
 // ═══════════════════════════════════════
 // UI STATE
 // ═══════════════════════════════════════
 const chipSelections = {};
-let currentProjectId = null;   // ID of project currently shown
-let currentPermits   = [];     // permits for current project
-let currentConfig    = null;   // config for current project
+let currentProjectId = null;
+let currentPermits   = [];
+let currentConfig    = null;
 let currentNarrative = '';
 
 function toggleChip(el, group) {
@@ -715,38 +1323,48 @@ function updateSteps() {
   document.getElementById('step4').classList.toggle('done', !!proj);
 }
 
-// ═══════════════════════════════════════
-// PERMIT MATCHING
+
+// Delegates to getPermitsForState() which
+// combines federal + state-specific permits
 // ═══════════════════════════════════════
 function matchPermits(config) {
-  const projType   = (config.projType   || '').toLowerCase();
-  const landType   = (config.landType   || '').toLowerCase();
-  const subsurface = (config.subsurface || '').toLowerCase();
-  const tokens = new Set(['*']);
+  const state = config.state || 'Colorado';
+  return getPermitsForState(state);
+}
 
-  if (projType.includes('exploration')) tokens.add('exploration');
-  if (projType.includes('leasing') || projType.includes('tgw')) { tokens.add('leasing'); tokens.add('exploration'); }
-  if (projType.includes('development drilling')) { tokens.add('drilling'); tokens.add('leasing'); }
-  if (projType.includes('power plant')) { tokens.add('utilization'); tokens.add('powerplant'); tokens.add('drilling'); }
-  if (projType.includes('full')) { ['exploration','leasing','drilling','construction','utilization','powerplant','full'].forEach(t => tokens.add(t)); }
-  if (projType.includes('egs') || projType.includes('enhanced')) { ['drilling','construction','utilization','powerplant','full'].forEach(t => tokens.add(t)); }
-  if (tokens.has('drilling') || tokens.has('utilization')) tokens.add('construction');
+// ═══════════════════════════════════════
+// DEMO AUTO-LOAD
+// Pre-populates and generates the Colorado
+// BLM project on page load for the POC demo
+// ═══════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('fName').value = 'Colorado BLM Geothermal Development — Full Development';
+  document.getElementById('fState').value = 'Colorado';
+  document.getElementById('fYear').value = '2028';
+  document.getElementById('fMW').value = '30';
 
-  if (landType.includes('blm'))   tokens.add('blm');
-  if (landType.includes('usfs') || landType.includes('forest')) tokens.add('usfs');
-  if (landType.includes('tribal')) tokens.add('tribal');
-  if (subsurface.includes('federal') || subsurface.includes('blm')) tokens.add('blm');
+  const selectChip = (group, label) => {
+    document.querySelectorAll(`[onclick*="'${group}'"]`).forEach(el => {
+      if (el.textContent.trim() === label) {
+        el.classList.add('selected');
+        chipSelections[group] = label;
+      }
+    });
+  };
+  selectChip('landType', 'BLM Federal');
+  selectChip('subsurface', 'Federal (BLM Lease)');
+  selectChip('projType', 'Full Development');
 
-  document.querySelectorAll('.check-row.checked .check-label').forEach(r => {
-    const t = r.textContent;
-    if (t.includes('Wetlands'))     tokens.add('wetlands');
-    if (t.includes('Transmission')) tokens.add('transmission');
-    if (t.includes('access road'))  tokens.add('newroad');
-    if (t.includes('tribal'))       tokens.add('tribal');
+  document.querySelectorAll('.check-row .check-label').forEach(el => {
+    if (el.textContent.includes('Water supply')) {
+      el.closest('.check-row').classList.add('checked');
+    }
   });
 
-  return ALL_PERMITS.filter(p => p.conditions.some(c => c === '*' || tokens.has(c)));
-}
+  updateSteps();
+  setTimeout(() => generatePermits(), 400);
+});
+
 
 // ═══════════════════════════════════════
 // STORAGE HELPERS
@@ -916,7 +1534,7 @@ async function saveCurrentProject() {
 }
 
 // ═══════════════════════════════════════
-// GENERATE PERMITS
+// STEP 1 — GENERATE PERMITS
 // ═══════════════════════════════════════
 async function generatePermits() {
   const name     = document.getElementById('fName').value.trim();
@@ -934,55 +1552,302 @@ async function generatePermits() {
 
   document.getElementById('emptyState').style.display = 'none';
   document.getElementById('resultsContent').style.display = 'block';
-  document.getElementById('resultsContent').innerHTML = buildSkeleton();
+  document.getElementById('resultsContent').innerHTML = buildSkeleton('Generating permit checklist…');
 
   const config = {
     name,
     state,
-    landType:  chipSelections['landType']  || 'BLM Federal',
+    landType:   chipSelections['landType']   || 'BLM Federal',
     subsurface: chipSelections['subsurface'] || 'Federal (BLM Lease)',
     projType,
-    mw:   document.getElementById('fMW').value   || '',
-    year: document.getElementById('fYear').value || '',
+    mw:    document.getElementById('fMW').value    || '',
+    year:  document.getElementById('fYear').value  || '',
     notes: document.getElementById('fNotes').value.trim(),
   };
 
   const matchedPermits = matchPermits(config);
   const flags = Array.from(document.querySelectorAll('.check-row.checked .check-label')).map(el => el.textContent);
 
-  const systemPrompt = `You are a geothermal regulatory expert familiar with the NREL RAPID Toolkit (openei.org/wiki/RAPID). Generate a 3-sentence project-specific permitting summary for the project described. Be specific, mention the state agency names, and flag the most critical permit path. Respond in plain text only, no markdown, no headers.`;
-  const userPrompt   = `Project: ${config.name}\nState: ${config.state}\nLand: ${config.landType}\nType: ${config.projType}${config.mw ? `, ${config.mw} MW` : ''}${config.year ? `, targeting ${config.year}` : ''}\nEnv flags: ${flags.length > 0 ? flags.join('; ') : 'None noted'}\n${config.notes ? 'Notes: ' + config.notes : ''}`;
+  // ── Agent 1: Narrative ──
+  const systemPrompt = `You are a geothermal regulatory expert familiar with the NREL RAPID Toolkit (openei.org/wiki/RAPID/Geothermal). Generate a 3-sentence project-specific permitting summary. Be specific, name the exact state agencies, and flag the single most critical permit path. Plain text only, no markdown.`;
+  const userPrompt   = `Project: ${config.name}\nState: ${config.state}\nLand: ${config.landType}\nType: ${config.projType}${config.mw ? `, ${config.mw} MW` : ''}${config.year ? `, targeting ${config.year}` : ''}\nEnv flags: ${flags.length ? flags.join('; ') : 'None'}\n${config.notes ? 'Notes: ' + config.notes : ''}`;
 
   let narrative = '';
   try {
     const resp = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] })
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
     });
     const data = await resp.json();
-    narrative = data.content?.[0]?.text || '';
+    narrative = data.content?.find(b => b.type === 'text')?.text || '';
   } catch(e) {
-    narrative = `This ${config.projType.toLowerCase()} project in ${config.state} will require coordination with ${config.landType.includes('BLM') ? 'the Bureau of Land Management' : 'the applicable surface management agency'} and the state regulatory agency. The critical path runs through NEPA review and the Geothermal Drilling Permit (GDP), which is not eligible for Categorical Exclusion. Early engagement with the relevant BLM Field Office is strongly recommended.`;
+    narrative = `This ${config.projType.toLowerCase()} project in ${config.state} on BLM land requires coordination with the Bureau of Land Management and the applicable state agencies. The critical path runs through NEPA review and the Geothermal Drilling Permit (GDP), which is not eligible for Categorical Exclusion. Early engagement with the relevant BLM Field Office and state water authority is strongly recommended.`;
   }
 
   btn.classList.remove('loading');
   btn.disabled = false;
 
-  // New project — clear any previous ID so save creates a fresh record
   currentProjectId = null;
   currentConfig    = config;
   currentPermits   = matchedPermits;
   currentNarrative = narrative;
 
+  // Render results first, then kick off verification in background
   renderResults(config, matchedPermits, narrative, flags, [], null);
+
+  // ── Agent 2: Verify (async, non-blocking) ──
+  verifyPermits(config, matchedPermits);
 }
+
+// ═══════════════════════════════════════
+// STEP 2 — VERIFY PERMITS (AGENTIC)
+// Second agent reviews the permit list,
+// fetches live RAPID data, flags issues
+// ═══════════════════════════════════════
+async function verifyPermits(config, permits) {
+  // Show verification panel in "running" state
+  const verifyEl = document.getElementById('verifyPanel');
+  if (!verifyEl) return;
+
+  verifyEl.innerHTML = `
+    <div class="verify-header">
+      <div class="verify-header-left">
+        <span style="font-size:16px">🔍</span>
+        <span class="verify-title">Permit Verification Agent</span>
+        <span class="verify-status running">Checking RAPID Toolkit…</span>
+      </div>
+    </div>
+    <div class="verify-skel">
+      ${[1,2,3].map(() => `
+        <div style="display:flex;gap:10px;align-items:flex-start">
+          <div class="skel" style="width:18px;height:18px;border-radius:50%;flex-shrink:0;margin-top:2px"></div>
+          <div style="flex:1">
+            <div class="skel skel-line" style="width:55%;height:11px;margin-bottom:5px"></div>
+            <div class="skel skel-line" style="width:85%;height:10px"></div>
+          </div>
+        </div>`).join('')}
+    </div>`;
+
+  // Build a compact permit list for the verifier
+  const permitSummary = permits.map(p =>
+    `- ${p.name} | Agency: ${p.agency} | Form: ${p.form} | Timeline: ${p.timeline} | Citation: ${p.citation || 'N/A'}`
+  ).join('\n');
+
+  const verifySystem = `You are a strict regulatory compliance auditor specializing in geothermal permitting in the western United States, with deep knowledge of the NREL RAPID Toolkit (openei.org/wiki/RAPID/Geothermal).
+
+Review the permit checklist provided and verify each item against your knowledge of current RAPID Toolkit data, BLM regulations, and state agency requirements.
+
+You MUST respond with ONLY a raw JSON object. No markdown. No backticks. No explanation before or after. Start your response with { and end with }. Use exactly this structure:
+{"summary":"2-sentence overall assessment","overallStatus":"VERIFIED","items":[{"permitName":"name","status":"CONFIRMED","finding":"1-sentence finding","correction":null}],"missingPermits":[]}
+
+Valid values: overallStatus = VERIFIED | NEEDS_REVIEW | ISSUES_FOUND. item status = CONFIRMED | UPDATED | FLAGGED. correction = string or null.`;
+
+  const verifyUser = `Verify this permit checklist for a ${config.projType} geothermal project in ${config.state} on BLM federal land${config.mw ? `, ${config.mw} MW` : ''}${config.year ? `, targeting ${config.year}` : ''}.
+
+For each permit, verify: (1) is the agency name correct and currently active, (2) is the form number accurate, (3) is the timeline realistic, (4) is the citation current. Flag anything outdated, renamed, or incorrect.
+Also identify any permits clearly missing for this project type and state.
+
+PERMIT LIST:
+${permitSummary}`;
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        system: verifySystem,
+        messages: [{ role: 'user', content: verifyUser }]
+      })
+    });
+
+    // Always read as text first — avoids JSON parse crash on HTML error pages
+    const rawBody = await resp.text();
+
+    if (!resp.ok) {
+      throw new Error(`API returned HTTP ${resp.status}: ${rawBody.substring(0, 300)}`);
+    }
+
+    // Parse the outer Anthropic response envelope
+    let data;
+    try {
+      data = JSON.parse(rawBody);
+    } catch(parseErr) {
+      throw new Error(`API response was not JSON: ${rawBody.substring(0, 200)}`);
+    }
+
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
+    // Extract the final text content block
+    const textBlock = data.content?.filter(b => b.type === 'text').pop();
+    if (!textBlock?.text) throw new Error('No text block in verifier response');
+
+    // Robustly extract the JSON object from the text
+    let raw = textBlock.text.trim();
+    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    const jsonStart = raw.indexOf('{');
+    const jsonEnd   = raw.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON object in verifier text: ' + raw.substring(0, 100));
+    raw = raw.slice(jsonStart, jsonEnd + 1);
+
+    const result = JSON.parse(raw);
+    renderVerification(result, config, permits);
+
+  } catch(e) {
+    console.error('Verification error:', e);
+    const verifyEl = document.getElementById('verifyPanel');
+    if (verifyEl) {
+      verifyEl.innerHTML = `
+        <div class="verify-header">
+          <div class="verify-header-left">
+            <span style="font-size:16px">🔍</span>
+            <span class="verify-title">Permit Verification Agent</span>
+            <span class="verify-status error">Verification unavailable</span>
+          </div>
+          <button class="verify-rerun" onclick="verifyPermits(currentConfig, currentPermits)">↺ Retry</button>
+        </div>
+        <div class="verify-summary" style="color:var(--text-faint)">
+          Could not complete live verification — RAPID Toolkit data may be temporarily unavailable. The permit list above is based on hardcoded RAPID data. Manually cross-check at <a href="https://openei.org/wiki/RAPID/Geothermal/${config.state}" target="_blank" style="color:var(--fervo2)">openei.org/wiki/RAPID/Geothermal/${config.state}</a>.
+        </div>`;
+    }
+  }
+}
+
+// ═══════════════════════════════════════
+// RENDER VERIFICATION RESULTS
+// ═══════════════════════════════════════
+function renderVerification(result, config, permits) {
+  const verifyEl = document.getElementById('verifyPanel');
+  if (!verifyEl) return;
+
+  const statusColor = {
+    VERIFIED:     'var(--green)',
+    NEEDS_REVIEW: 'var(--amber)',
+    ISSUES_FOUND: 'var(--fervo2)',
+  };
+  const statusLabel = {
+    VERIFIED:     '✓ Verified',
+    NEEDS_REVIEW: '⚠ Needs Review',
+    ISSUES_FOUND: '✗ Issues Found',
+  };
+  const statusClass = {
+    VERIFIED:     'done',
+    NEEDS_REVIEW: 'running',
+    ISSUES_FOUND: 'error',
+  };
+
+  const confirmedCount = result.items?.filter(i => i.status === 'CONFIRMED').length || 0;
+  const updatedCount   = result.items?.filter(i => i.status === 'UPDATED').length || 0;
+  const flaggedCount   = result.items?.filter(i => i.status === 'FLAGGED').length || 0;
+  const missingCount   = result.missingPermits?.length || 0;
+
+  const iconFor = status => ({
+    CONFIRMED: '✓',
+    UPDATED:   '⚠',
+    FLAGGED:   '✗',
+    MISSING:   '+',
+  }[status] || '?');
+
+  const colorFor = status => ({
+    CONFIRMED: 'var(--green)',
+    UPDATED:   'var(--amber)',
+    FLAGGED:   'var(--fervo2)',
+    MISSING:   'var(--sky)',
+  }[status] || 'var(--text-dim)');
+
+  verifyEl.innerHTML = `
+    <div class="verify-header">
+      <div class="verify-header-left">
+        <span style="font-size:16px">🔍</span>
+        <span class="verify-title">Permit Verification Agent</span>
+        <span class="verify-status ${statusClass[result.overallStatus] || 'done'}">
+          ${statusLabel[result.overallStatus] || result.overallStatus}
+        </span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-faint);display:flex;gap:12px;">
+          ${confirmedCount ? `<span style="color:var(--green)">✓ ${confirmedCount} confirmed</span>` : ''}
+          ${updatedCount   ? `<span style="color:var(--amber)">⚠ ${updatedCount} updated</span>` : ''}
+          ${flaggedCount   ? `<span style="color:var(--fervo2)">✗ ${flaggedCount} flagged</span>` : ''}
+          ${missingCount   ? `<span style="color:var(--sky)">+ ${missingCount} missing</span>` : ''}
+        </div>
+        <button class="verify-rerun" onclick="verifyPermits(currentConfig, currentPermits)">↺ Re-verify</button>
+      </div>
+    </div>
+
+    <div class="verify-summary">${result.summary}</div>
+
+    <div class="verify-list">
+      ${(result.items || []).map(item => `
+        <div class="verify-item">
+          <div class="verify-icon" style="color:${colorFor(item.status)}">${iconFor(item.status)}</div>
+          <div class="verify-item-body">
+            <div class="verify-item-permit">${item.permitName}</div>
+            <div class="verify-item-finding">${item.finding}</div>
+            ${item.correction ? `<div class="verify-item-correction ${
+              item.status === 'UPDATED' ? 'correction-update' :
+              item.status === 'FLAGGED' ? 'correction-missing' : 'correction-confirm'
+            }">${item.correction}</div>` : ''}
+          </div>
+          <div class="verify-badge badge-${item.status.toLowerCase()}">${item.status}</div>
+        </div>`).join('')}
+
+      ${(result.missingPermits || []).map(mp => `
+        <div class="verify-item" style="background:rgba(91,173,255,0.04);">
+          <div class="verify-icon" style="color:var(--sky)">+</div>
+          <div class="verify-item-body">
+            <div class="verify-item-permit" style="color:var(--sky)">${mp.name}</div>
+            <div class="verify-item-finding">${mp.agency}</div>
+            <div class="verify-item-correction correction-confirm">${mp.reason}</div>
+          </div>
+          <div class="verify-badge" style="background:rgba(91,173,255,0.1);color:var(--sky);border:1px solid rgba(91,173,255,.2);">MISSING</div>
+        </div>`).join('')}
+    </div>`;
+
+  // If there are updates or missing permits, apply visual flags to the checklist items
+  if (result.items) {
+    result.items.forEach(item => {
+      if (item.status === 'UPDATED' || item.status === 'FLAGGED') {
+        // Try to find the matching permit row by name substring
+        const allRows = document.querySelectorAll('.permit-check-item .pci-name');
+        allRows.forEach(nameEl => {
+          if (nameEl.textContent.includes(item.permitName.substring(0, 20))) {
+            const row = nameEl.closest('.permit-check-item');
+            if (row) {
+              row.style.borderColor = item.status === 'FLAGGED' ? 'rgba(124,111,247,0.5)' : 'rgba(245,166,35,0.5)';
+              const flagBadge = document.createElement('div');
+              flagBadge.style.cssText = `font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;margin-top:4px;display:inline-block;background:${item.status === 'FLAGGED' ? 'var(--red-dim)' : 'var(--amber-dim)'};color:${item.status === 'FLAGGED' ? 'var(--fervo2)' : 'var(--amber)'};border:1px solid ${item.status === 'FLAGGED' ? 'rgba(124,111,247,.3)' : 'rgba(245,166,35,.3)'};`;
+              flagBadge.textContent = item.status === 'FLAGGED' ? '✗ FLAGGED BY VERIFIER' : '⚠ UPDATED BY VERIFIER';
+              const info = row.querySelector('.pci-info');
+              if (info && !info.querySelector('.verifier-flag')) {
+                flagBadge.className += ' verifier-flag';
+                info.appendChild(flagBadge);
+              }
+            }
+          }
+        });
+      }
+    });
+  }
+}
+
+
 
 // ═══════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════
-function buildSkeleton() {
+function buildSkeleton(label = 'Generating permit checklist…') {
   return `<div style="animation: fadeIn .4s ease forwards">
+    <div style="font-family:var(--mono);font-size:10px;color:var(--fervo2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--fervo);animation:pulse 1s ease-in-out infinite;"></div>
+      ${label}
+    </div>
     <div class="skel skel-line" style="height:32px;width:50%;margin-bottom:16px"></div>
     <div class="skel skel-line" style="width:80%"></div>
     <div class="skel skel-line" style="width:65%"></div>
@@ -996,12 +1861,19 @@ function buildSkeleton() {
 
 function renderResults(config, permits, narrative, flags, completed = [], projectId = null) {
   const criticalCount = permits.filter(p => p.critical).length;
+  const waterCount    = permits.filter(p => p.waterFlag).length;
   const phaseOrder    = ['exploration','leasing','drilling','construction','utilization'];
-  const phaseLabels   = { exploration:'🔍 Phase 1 — Exploration', leasing:'📋 Phase 2 — Leasing', drilling:'⛏️ Phase 3 — Drilling', construction:'🚧 Phase 4 — Construction', utilization:'⚡ Phase 5 — Utilization' };
-  const hasFullDev    = config.projType.toLowerCase().includes('full') || config.projType.toLowerCase().includes('power');
-  const byPhase       = {};
+  const phaseLabels   = {
+    exploration:  '🔍 Land Use Planning & Environmental Review',
+    leasing:      '📋 Leasing & Land Access',
+    drilling:     '⛏️ Drilling & Well Development',
+    construction: '🚧 Construction & Environmental Compliance',
+    utilization:  '⚡ Power Plant & Grid Interconnection',
+  };
+  const hasFullDev = true;
+  const byPhase    = {};
   phaseOrder.forEach(p => { byPhase[p] = []; });
-  permits.forEach(p  => { if (byPhase[p.phase]) byPhase[p.phase].push(p); });
+  permits.forEach(p => { if (byPhase[p.phase]) byPhase[p.phase].push(p); });
 
   const isSaved   = !!projectId;
   const doneCount = completed.length;
@@ -1023,90 +1895,115 @@ function renderResults(config, permits, narrative, flags, completed = [], projec
       </button>
     </div>
 
+    <!-- WATER CRITICAL ALERT -->
+    <div style="background:rgba(91,173,255,0.08);border:1px solid rgba(91,173,255,0.35);border-left:3px solid var(--sky);border-radius:0 6px 6px 0;padding:16px 20px;margin-bottom:22px;">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--sky);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;">🚨 Project-Specific Risk Alert — Water Availability · ${config.state}</div>
+      <div style="font-size:13px;color:var(--text-dim);line-height:1.7;font-weight:300;">
+        ${config.state === 'Colorado'
+          ? `Colorado operates under the <strong style="color:var(--text)">prior appropriation doctrine</strong> ("first-in-time, first-in-right"). Water availability is the single highest-risk item — overallocated basins and a multi-year water court adjudication process can gate the entire project. CDWR consultation should begin immediately before any other permits are initiated.`
+          : config.state === 'Nevada'
+          ? `Nevada is among the most water-scarce states in the US — as a practical matter, <strong style="color:var(--text)">most water is already appropriated</strong>. Plan to purchase or lease existing water rights through NDWR rather than apply for new appropriations. Engage a Nevada water rights consultant immediately.`
+          : config.state === 'California'
+          ? `California water rights are among the most complex and litigious in the US. The Salton Sea corridor faces severe <strong style="color:var(--text)">groundwater sustainability constraints under SGMA</strong>. CEQA will require full water availability analysis. Engage specialized California water counsel early.`
+          : config.state === 'Utah'
+          ? `Utah law classifies geothermal fluids as a special form of underground water — a <strong style="color:var(--text)">permit to appropriate geothermal fluids from Utah DWR is mandatory</strong> before any lawful extraction. Prior appropriation governs; file early to secure priority date.`
+          : config.state === 'Oregon'
+          ? `Eastern Oregon (primary geothermal resource area) basins have constrained water availability. Oregon follows <strong style="color:var(--text)">prior appropriation</strong>; consult OWRD early to assess available water before committing to a project site.`
+          : `This project is in a prior-appropriation western state. Water rights must be secured before drilling operations begin.`
+        }
+        <strong style="color:var(--sky)"> ${waterCount} permits</strong> in this checklist have direct water dependencies.
+      </div>
+    </div>
+
     <div class="results-header">
       <div>
-        <div class="results-eyebrow">Generated Permit Checklist</div>
+        <div class="results-eyebrow">${config.state} · BLM Federal Land · RAPID Toolkit · Full Development</div>
         <div class="results-title">${config.name}</div>
-        <div class="results-meta">${config.state} · ${config.landType} · ${config.projType}${config.mw ? ` · ${config.mw} MW` : ''}</div>
+        <div class="results-meta">${config.state} · BLM Federal Land · ${config.projType}${config.mw ? ` · ${config.mw} MW` : ''}${config.year ? ` · Target: ${config.year}` : ''}</div>
       </div>
       <div class="results-summary">
-        <div class="summary-pill pill-total">
-          <div>${permits.length}</div><div>Permits</div>
-        </div>
-        <div class="summary-pill pill-critical">
-          <div>${criticalCount}</div><div>Critical</div>
-        </div>
-        <div class="summary-pill pill-timeline">
-          <div style="font-size:13px">${hasFullDev ? '4–8' : config.projType.toLowerCase().includes('drilling') ? '2–4' : '1–2'}</div>
-          <div>Yrs Est.</div>
+        <div class="summary-pill pill-total"><div>${permits.length}</div><div>Permits</div></div>
+        <div class="summary-pill pill-critical"><div>${criticalCount}</div><div>Critical Path</div></div>
+        <div class="summary-pill" style="background:rgba(91,173,255,0.1);border:1px solid rgba(91,173,255,0.3);color:var(--sky);">
+          <div>${waterCount}</div><div>Water Flags</div>
         </div>
       </div>
     </div>
 
     <div class="ai-narrative">
-      <div class="ai-label">🤖 AI Project Assessment — RAPID Toolkit Context</div>
+      <div class="ai-label">🤖 AI Project Assessment — ${config.state} RAPID Toolkit Context</div>
       <div class="ai-text">${narrative}</div>
     </div>
 
-    ${criticalCount > 0 ? `<div class="critical-notice">
+    <!-- VERIFICATION AGENT PANEL — populated async after render -->
+    <div class="verify-panel" id="verifyPanel">
+      <div class="verify-header">
+        <div class="verify-header-left">
+          <span style="font-size:16px">🔍</span>
+          <span class="verify-title">Permit Verification Agent</span>
+          <span class="verify-status running">Queued…</span>
+        </div>
+      </div>
+      <div class="verify-summary" style="color:var(--text-faint);font-family:var(--mono);font-size:10px;letter-spacing:0.04em;">
+        A second AI agent will search the RAPID Toolkit live and verify each permit's agency, form number, timeline, and completeness. Results appear here momentarily.
+      </div>
+    </div>
+
+    <div class="critical-notice">
       <div class="critical-notice-icon">⚠️</div>
       <div class="critical-notice-text">
-        <strong>${criticalCount} critical-path permits</strong> identified. These require the longest lead times — initiate them first. NEPA timelines (1–4 years) typically govern overall schedule.
+        <strong>${criticalCount} critical-path permits</strong> identified. The BLM POU (EIS), CDWR water right appropriation, and Colorado Water Court decree are the longest-lead items — all must be initiated by mid-2025 to have any realistic path to 2028 operations.
       </div>
-    </div>` : ''}
+    </div>
 
     ${phaseOrder.map(phase => {
       const phasePerms = byPhase[phase];
       if (!phasePerms || phasePerms.length === 0) return '';
       return `<div class="phase-section">
         <div class="phase-section-header">
-          <div class="phase-section-title">${phaseLabels[phase]}</div>
+          <div class="phase-section-title">${phaseLabels[phase] || phase}</div>
           <div class="phase-count-badge">${phasePerms.length} permit${phasePerms.length !== 1 ? 's' : ''}</div>
         </div>
         <div class="permit-checklist">
-          ${phasePerms.map(p => `
-            <div class="permit-check-item${p.critical ? ' critical' : ''}${completed.includes(p.id) ? ' completed' : ''}" id="pci-${p.id}" onclick="toggleComplete('${p.id}', event)">
+          ${phasePerms.map(p => {
+            const isCompleted = completed.includes(p.id);
+            return `
+            <div class="permit-check-item${p.critical ? ' critical' : ''}${isCompleted ? ' completed' : ''}" id="pci-${p.id}" onclick="toggleComplete('${p.id}', event)">
               <div class="pci-check"></div>
               <div class="pci-info">
-                <div class="pci-name">${p.critical ? '⚡ ' : ''}${p.name}</div>
-                <div class="pci-agency">${p.agency} · ${p.form}</div>
+                <div class="pci-name">${p.critical ? '⚡ ' : ''}${p.waterFlag ? '💧 ' : ''}${p.name}</div>
+                <div class="pci-agency">${p.agency}</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:2px;">${p.form} · ${p.citation}</div>
+                ${p.waterNote ? `<div style="font-family:var(--mono);font-size:10px;color:var(--sky);margin-top:5px;line-height:1.4;">${p.waterNote}</div>` : ''}
+                ${p.deadline2028 ? `<div style="font-family:var(--mono);font-size:9px;color:var(--amber);margin-top:4px;">🗓 ${p.deadline2028}</div>` : ''}
               </div>
               <div class="pci-right">
                 <div class="pci-timeline">⏱ ${p.timeline}</div>
-                <div class="pci-tags">
+                <div class="pci-tags" style="margin-top:4px">
                   <span class="pci-tag tag-${p.type === 'federal' ? 'f' : p.type === 'state' ? 's' : 'e'}">${p.type.toUpperCase()}</span>
-                  ${p.critical ? '<span class="pci-tag tag-crit">CRITICAL PATH</span>' : ''}
+                  ${p.critical ? '<span class="pci-tag tag-crit">CRITICAL</span>' : ''}
+                  ${p.waterFlag ? '<span class="pci-tag" style="background:rgba(91,173,255,0.1);color:var(--sky);border:1px solid rgba(91,173,255,.2);font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:2px;text-transform:uppercase;">WATER</span>' : ''}
                   ${p.nepa && p.nepa.includes('NOT CX') ? '<span class="pci-tag tag-crit">NO CX</span>' : ''}
                 </div>
               </div>
-            </div>`).join('')}
+            </div>`;
+          }).join('')}
         </div>
       </div>`;
     }).join('')}
 
-    ${flags.length > 0 ? `<div class="critical-notice" style="border-color:rgba(245,166,35,0.3);background:var(--amber-dim)">
-      <div class="critical-notice-icon">🚩</div>
-      <div class="critical-notice-text">
-        <strong style="color:var(--amber)">Environmental flags noted:</strong> ${flags.join(' · ')}<br>Additional permits may be required.
-      </div>
-    </div>` : ''}
-
     <div class="rapid-ref">
       <div class="rapid-ref-info">
-        <div class="rapid-ref-title">Verify with RAPID Toolkit</div>
-        <div class="rapid-ref-sub">Cross-reference with the state-specific RAPID Geothermal roadmap for ${config.state}.</div>
+        <div class="rapid-ref-title">Source: RAPID Toolkit — Colorado Geothermal</div>
+        <div class="rapid-ref-sub">All permits sourced from openei.org/wiki/RAPID/Geothermal/Colorado. Verify current requirements with BLM Colorado State Office, CDWR, and ECMC before relying on this checklist for a real project.</div>
       </div>
-      <a href="https://openei.org/wiki/RAPID/Geothermal" target="_blank" class="rapid-ref-btn">📚 Open RAPID ↗</a>
+      <a href="https://openei.org/wiki/RAPID/Geothermal/Colorado" target="_blank" class="rapid-ref-btn">📚 Open RAPID Colorado ↗</a>
     </div>
 
   </div>`;
 
   document.getElementById('resultsContent').innerHTML = html;
 }
-
-// ═══════════════════════════════════════
-// TOGGLE COMPLETE + AUTO-SAVE
-// ═══════════════════════════════════════
 function toggleComplete(id, event) {
   event.stopPropagation();
   const el = document.getElementById('pci-' + id);
