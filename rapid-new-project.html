@@ -8,28 +8,28 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #0c0b0a;
-    --surface:   #131211;
-    --surface2:  #1a1917;
-    --surface3:  #211f1d;
-    --border:    #272422;
-    --border2:   #37332e;
-    --fervo:     #ff5500;
-    --fervo2:    #ff7433;
-    --fervo3:    #ffaa66;
-    --fervo4:    #ffd4a8;
-    --fervo-glow:  rgba(255,85,0,0.18);
-    --fervo-glow2: rgba(255,85,0,0.08);
+    --bg:        #0b0c10;
+    --surface:   #11121a;
+    --surface2:  #181922;
+    --surface3:  #1e2030;
+    --border:    #22243a;
+    --border2:   #30335a;
+    --fervo:     #7c6ff7;
+    --fervo2:    #9b96fa;
+    --fervo3:    #c4c0fd;
+    --fervo4:    #e2e0ff;
+    --fervo-glow:  rgba(124,111,247,0.18);
+    --fervo-glow2: rgba(124,111,247,0.08);
     --green:     #3dd68c;
     --green-dim: rgba(61,214,140,0.11);
     --amber:     #f5a623;
     --amber-dim: rgba(245,166,35,0.10);
     --sky:       #5badff;
     --sky-dim:   rgba(91,173,255,0.10);
-    --red-dim:   rgba(255,85,0,0.10);
-    --text:      #ede9e3;
-    --text-dim:  #8a8580;
-    --text-faint:#48443f;
+    --red-dim:   rgba(124,111,247,0.10);
+    --text:      #e8eaf8;
+    --text-dim:  #8890b0;
+    --text-faint:#3a3f60;
     --mono:    'IBM Plex Mono', monospace;
     --sans:    'Barlow', sans-serif;
     --display: 'Barlow Condensed', sans-serif;
@@ -47,8 +47,8 @@
   body::before {
     content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background:
-      radial-gradient(ellipse 70% 50% at 5% 95%,  rgba(255,85,0,0.09)  0%, transparent 65%),
-      radial-gradient(ellipse 50% 35% at 95% 5%,  rgba(255,116,51,0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 5% 95%,  rgba(124,111,247,0.09)  0%, transparent 65%),
+      radial-gradient(ellipse 50% 35% at 95% 5%,  rgba(155,150,250,0.06) 0%, transparent 60%),
       repeating-linear-gradient(0deg,  transparent, transparent 59px, rgba(255,255,255,0.013) 60px),
       repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(255,255,255,0.013) 60px);
   }
@@ -58,7 +58,7 @@
     position: sticky; top: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 32px; height: 60px;
-    background: rgba(12,11,10,0.94); backdrop-filter: blur(14px);
+    background: rgba(11,12,16,0.94); backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
   }
   .nav-brand { display: flex; align-items: center; gap: 14px; }
@@ -66,7 +66,7 @@
     width: 34px; height: 34px; background: var(--fervo);
     border-radius: 5px; display: flex; align-items: center; justify-content: center;
     font-family: var(--display); font-size: 15px; font-weight: 800; color: white;
-    box-shadow: 0 0 16px rgba(255,85,0,0.45);
+    box-shadow: 0 0 16px rgba(124,111,247,0.45);
   }
   .nav-wordmark { display: flex; flex-direction: column; gap: 1px; }
   .nav-title { font-family: var(--display); font-size: 17px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; line-height: 1; }
@@ -163,9 +163,9 @@
     padding: 14px; border-radius: 5px;
     transition: background .15s, transform .1s, box-shadow .2s;
     display: flex; align-items: center; justify-content: center; gap: 9px;
-    box-shadow: 0 0 24px rgba(255,85,0,0.3);
+    box-shadow: 0 0 24px rgba(124,111,247,0.3);
   }
-  .btn-generate:hover { background: var(--fervo2); transform: translateY(-1px); box-shadow: 0 0 32px rgba(255,85,0,0.5); }
+  .btn-generate:hover { background: var(--fervo2); transform: translateY(-1px); box-shadow: 0 0 32px rgba(124,111,247,0.5); }
   .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
   .btn-generate .spinner { width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin .7s linear infinite; display: none; }
   .btn-generate.loading .spinner { display: block; }
@@ -188,10 +188,10 @@
   }
   .empty-glyph::before {
     content: ''; position: absolute; inset: -8px; border-radius: 50%;
-    border: 1px solid rgba(255,85,0,0.15);
+    border: 1px solid rgba(124,111,247,0.15);
     animation: heatpulse 3s ease-in-out infinite reverse;
   }
-  @keyframes heatpulse { 0%,100% { box-shadow: 0 0 20px rgba(255,85,0,0.1); } 50% { box-shadow: 0 0 40px rgba(255,85,0,0.25); } }
+  @keyframes heatpulse { 0%,100% { box-shadow: 0 0 20px rgba(124,111,247,0.1); } 50% { box-shadow: 0 0 40px rgba(124,111,247,0.25); } }
 
   .empty-title { font-family: var(--display); font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
   .empty-sub { font-size: 13px; font-weight: 300; color: var(--text-dim); max-width: 380px; line-height: 1.65; }
@@ -208,7 +208,7 @@
   .summary-pill:first-child { border-radius: 6px 0 0 6px; }
   .summary-pill:last-child  { border-radius: 0 6px 6px 0; }
   .pill-total    { background: var(--surface); border: 1px solid var(--border); }
-  .pill-critical { background: var(--red-dim);   border: 1px solid rgba(255,85,0,0.3);   color: var(--fervo2); }
+  .pill-critical { background: var(--red-dim);   border: 1px solid rgba(124,111,247,0.3);   color: var(--fervo2); }
   .pill-timeline { background: var(--amber-dim); border: 1px solid rgba(245,166,35,0.3); color: var(--amber); }
   .summary-pill div:first-child { font-family: var(--display); font-size: 22px; font-weight: 800; line-height: 1; }
   .summary-pill div:last-child  { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; opacity: .8; }
@@ -256,11 +256,11 @@
   .tag-f { background: var(--sky-dim);   color: var(--sky);   border: 1px solid rgba(91,173,255,.2); }
   .tag-s { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,214,140,.2); }
   .tag-e { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,.2); }
-  .tag-crit { background: var(--red-dim); color: var(--fervo2); border: 1px solid rgba(255,85,0,.22); }
+  .tag-crit { background: var(--red-dim); color: var(--fervo2); border: 1px solid rgba(124,111,247,.22); }
 
   /* Alerts */
   .critical-notice {
-    background: var(--red-dim); border: 1px solid rgba(255,85,0,0.3);
+    background: var(--red-dim); border: 1px solid rgba(124,111,247,0.3);
     border-radius: 5px; padding: 13px 16px; margin-bottom: 22px;
     display: flex; align-items: flex-start; gap: 11px;
   }
@@ -272,8 +272,8 @@
   .rapid-ref { margin-top: 32px; padding: 18px 22px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
   .rapid-ref-title { font-family: var(--display); font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px; }
   .rapid-ref-sub { font-size: 12px; font-weight: 300; color: var(--text-dim); }
-  .rapid-ref-btn { background: var(--fervo); border: none; color: white; text-decoration: none; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 18px; border-radius: 4px; white-space: nowrap; transition: background .15s, box-shadow .2s; flex-shrink: 0; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 16px rgba(255,85,0,0.25); }
-  .rapid-ref-btn:hover { background: var(--fervo2); box-shadow: 0 0 24px rgba(255,85,0,0.4); }
+  .rapid-ref-btn { background: var(--fervo); border: none; color: white; text-decoration: none; font-family: var(--mono); font-size: 11px; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; padding: 10px 18px; border-radius: 4px; white-space: nowrap; transition: background .15s, box-shadow .2s; flex-shrink: 0; display: flex; align-items: center; gap: 6px; box-shadow: 0 0 16px rgba(124,111,247,0.25); }
+  .rapid-ref-btn:hover { background: var(--fervo2); box-shadow: 0 0 24px rgba(124,111,247,0.4); }
 
   /* Skeleton loader */
   .skel { background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%); background-size: 200%; animation: shimmer 1.5s infinite; border-radius: 4px; }
@@ -284,12 +284,148 @@
   @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
   .fade-in { animation: fadeIn .4s ease forwards; }
 
+  /* ── SAVED PROJECTS DRAWER ── */
+  .projects-toggle {
+    display: flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    color: var(--text-dim); letter-spacing: 0.05em; text-transform: uppercase;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 4px; padding: 6px 12px; cursor: pointer;
+    transition: all .15s;
+  }
+  .projects-toggle:hover { border-color: var(--fervo); color: var(--fervo); }
+  .projects-toggle .badge {
+    background: var(--fervo); color: white;
+    font-size: 9px; font-weight: 700;
+    padding: 1px 6px; border-radius: 10px; line-height: 1.5;
+  }
+
+  .projects-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(3px); z-index: 200;
+    opacity: 0; pointer-events: none; transition: opacity .25s;
+  }
+  .projects-overlay.open { opacity: 1; pointer-events: all; }
+
+  .projects-drawer {
+    position: fixed; top: 0; left: -430px;
+    width: 430px; height: 100vh;
+    background: var(--surface);
+    border-right: 1px solid var(--border2);
+    border-top: 3px solid var(--fervo);
+    z-index: 201; display: flex; flex-direction: column;
+    transition: left .3s cubic-bezier(.4,0,.2,1);
+  }
+  .projects-drawer.open { left: 0; }
+
+  .pd-header {
+    padding: 20px 22px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+  }
+  .pd-title { font-family: var(--display); font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; }
+  .pd-count { font-family: var(--mono); font-size: 11px; color: var(--text-faint); }
+  .pd-close {
+    background: none; border: 1px solid var(--border); color: var(--text-dim); cursor: pointer;
+    width: 28px; height: 28px; border-radius: 4px; font-size: 13px;
+    display: flex; align-items: center; justify-content: center; transition: all .15s;
+  }
+  .pd-close:hover { border-color: var(--fervo); color: var(--fervo); }
+
+  .pd-list { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+
+  .pd-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    height: 100%; gap: 10px; color: var(--text-faint);
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em;
+    text-transform: uppercase; text-align: center; padding: 40px;
+  }
+  .pd-empty-icon { font-size: 28px; opacity: 0.35; margin-bottom: 4px; }
+
+  .pd-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 6px; padding: 14px 16px; cursor: pointer;
+    transition: border-color .15s, background .15s; position: relative;
+  }
+  .pd-card:hover { border-color: var(--border2); background: var(--surface3); }
+  .pd-card.active-project { border-color: rgba(124,111,247,0.6); }
+  .pd-card.active-project::before {
+    content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--fervo); border-radius: 6px 0 0 6px;
+  }
+
+  .pd-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 5px; }
+  .pd-card-name { font-family: var(--display); font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; line-height: 1.2; }
+  .pd-card-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .pd-card-btn {
+    background: none; border: none; color: var(--text-faint);
+    cursor: pointer; font-size: 12px; padding: 2px 5px; line-height: 1;
+    border-radius: 3px; transition: color .15s;
+  }
+  .pd-card-btn:hover { color: var(--fervo2); }
+  .pd-card-btn.del:hover { color: #ff6b6b; }
+
+  .pd-card-meta { font-family: var(--mono); font-size: 10px; color: var(--text-dim); margin-bottom: 8px; }
+
+  .pd-card-pills { display: flex; gap: 5px; flex-wrap: wrap; }
+  .pd-pill {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 2px;
+  }
+  .pd-pill-permits  { background: var(--sky-dim);   color: var(--sky);   border: 1px solid rgba(91,173,255,.2); }
+  .pd-pill-critical { background: rgba(124,111,247,0.1); color: var(--fervo2); border: 1px solid rgba(124,111,247,.25); }
+  .pd-pill-done     { background: var(--green-dim); color: var(--green); border: 1px solid rgba(61,214,140,.2); }
+  .pd-pill-date     { background: var(--surface3);  color: var(--text-faint); border: 1px solid var(--border); }
+
+  .pd-progress { margin-top: 10px; }
+  .pd-progress-bar { height: 3px; background: var(--border2); border-radius: 2px; overflow: hidden; }
+  .pd-progress-fill { height: 100%; background: linear-gradient(90deg, var(--fervo), var(--fervo2)); border-radius: 2px; transition: width .3s; }
+  .pd-progress-label { font-family: var(--mono); font-size: 9px; color: var(--text-faint); margin-top: 4px; letter-spacing: 0.04em; }
+
+  .pd-footer { padding: 14px 22px; border-top: 1px solid var(--border); flex-shrink: 0; }
+  .pd-footer-hint { font-family: var(--mono); font-size: 10px; color: var(--text-faint); text-align: center; letter-spacing: 0.04em; }
+
+  /* Toast notification */
+  .toast {
+    position: fixed; bottom: 28px; left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    background: var(--surface3); border: 1px solid var(--fervo);
+    color: var(--text); font-family: var(--mono); font-size: 11px;
+    letter-spacing: 0.05em; padding: 10px 22px; border-radius: 5px;
+    z-index: 400; opacity: 0; transition: all .3s; white-space: nowrap;
+    box-shadow: 0 4px 24px rgba(124,111,247,0.3);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Save bar in results */
+  .save-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; margin-bottom: 22px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 6px; gap: 14px;
+  }
+  .save-bar-left { display: flex; align-items: center; gap: 10px; }
+  .save-bar-icon { font-size: 16px; }
+  .save-bar-text { font-family: var(--mono); font-size: 11px; color: var(--text-dim); letter-spacing: 0.03em; }
+  .save-bar-text strong { color: var(--fervo2); }
+  .btn-save {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--fervo); color: white; border: none; cursor: pointer;
+    font-family: var(--mono); font-size: 11px; font-weight: 500;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    padding: 8px 16px; border-radius: 4px; white-space: nowrap;
+    transition: background .15s, box-shadow .15s;
+    box-shadow: 0 0 14px rgba(124,111,247,0.22);
+  }
+  .btn-save:hover { background: var(--fervo2); box-shadow: 0 0 22px rgba(124,111,247,0.4); }
+  .btn-save.saved { background: var(--green); box-shadow: none; cursor: default; }
+
   /* Responsive */
   @media (max-width: 900px) {
     .page-wrap { grid-template-columns: 1fr; }
     .form-panel { position: static; max-height: none; }
     .results-header { flex-direction: column; }
     .results-summary { flex-direction: row; }
+    .projects-drawer { width: 100vw; }
   }
 </style>
 </head>
@@ -309,8 +445,36 @@
     <div class="nav-divider"></div>
     <a href="#" class="nav-link active">New Project</a>
     <a href="https://openei.org/wiki/RAPID/Geothermal" target="_blank" class="nav-link">RAPID ↗</a>
+    <button class="projects-toggle" onclick="openProjectsDrawer()" id="projectsToggle">
+      📁 Saved Projects <span class="badge" id="projectsBadge">0</span>
+    </button>
   </div>
 </nav>
+
+<!-- SAVED PROJECTS DRAWER -->
+<div class="projects-overlay" id="projectsOverlay" onclick="closeProjectsDrawer()"></div>
+<div class="projects-drawer" id="projectsDrawer">
+  <div class="pd-header">
+    <div>
+      <div class="pd-title">Saved Projects</div>
+      <div class="pd-count" id="pdCount">0 projects</div>
+    </div>
+    <button class="pd-close" onclick="closeProjectsDrawer()">✕</button>
+  </div>
+  <div class="pd-list" id="pdList">
+    <div class="pd-empty">
+      <div class="pd-empty-icon">🗂️</div>
+      <div>No saved projects yet</div>
+      <div style="font-size:10px;margin-top:4px;opacity:.7">Generate a checklist and click Save Project</div>
+    </div>
+  </div>
+  <div class="pd-footer">
+    <div class="pd-footer-hint">Projects saved locally · Click any project to reload it</div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <div class="page-wrap">
 
@@ -448,9 +612,7 @@
 
 <script>
 // ═══════════════════════════════════════════════
-// PERMIT DATABASE — Same as dashboard, used for
-// local logic (no API calls for permit matching)
-// AI API used only for project-specific narrative
+// PERMIT DATABASE
 // ═══════════════════════════════════════════════
 const ALL_PERMITS = [
   { id:'noi', phase:'exploration', type:'federal', name:'Notice of Intent (NOI)', agency:'BLM', form:'Form 3200-009', timeline:'30–60 days', nepa:'CX eligible', critical:false,
@@ -466,7 +628,7 @@ const ALL_PERMITS = [
     conditions:['leasing','drilling','full'],
     desc:'Shallow exploratory wells to confirm geothermal resource — may qualify for Categorical Exclusion.' },
   { id:'nhpa', phase:'exploration', type:'env', name:'NHPA Sec. 106 / ESA Sec. 7 Consultation', agency:'BLM + SHPO + USFWS', form:'Consultation process', timeline:'60–180 days', nepa:'Part of NEPA', critical:false,
-    conditions:['*'], // always
+    conditions:['*'],
     desc:'Cultural resources survey and T&E species consultation required before ground disturbance.' },
   { id:'lease', phase:'leasing', type:'federal', name:'Geothermal Resource Lease (BLM)', agency:'Bureau of Land Management', form:'Form 3200-024a', timeline:'6–18 months', nepa:'EA required', critical:true,
     conditions:['leasing','drilling','construction','utilization','full','blm'],
@@ -525,10 +687,12 @@ const ALL_PERMITS = [
 // UI STATE
 // ═══════════════════════════════════════
 const chipSelections = {};
-const checkRows = {};
+let currentProjectId = null;   // ID of project currently shown
+let currentPermits   = [];     // permits for current project
+let currentConfig    = null;   // config for current project
+let currentNarrative = '';
 
 function toggleChip(el, group) {
-  // Single select within group
   document.querySelectorAll(`[onclick*="'${group}'"]`).forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   chipSelections[group] = el.textContent.trim();
@@ -541,11 +705,10 @@ function toggleCheck(el) {
 }
 
 function updateSteps() {
-  const name = document.getElementById('fName').value.trim();
+  const name  = document.getElementById('fName').value.trim();
   const state = document.getElementById('fState').value;
-  const land = chipSelections['landType'];
-  const proj = chipSelections['projType'];
-
+  const land  = chipSelections['landType'];
+  const proj  = chipSelections['projType'];
   document.getElementById('step1').classList.toggle('done', !!name);
   document.getElementById('step2').classList.toggle('done', !!state);
   document.getElementById('step3').classList.toggle('done', !!land);
@@ -553,58 +716,211 @@ function updateSteps() {
 }
 
 // ═══════════════════════════════════════
-// PERMIT LOGIC — Pure JS, no API calls
+// PERMIT MATCHING
 // ═══════════════════════════════════════
 function matchPermits(config) {
-  const flags = new Set(config.flags);
-  const projType = (config.projType || '').toLowerCase();
-  const landType = (config.landType || '').toLowerCase();
+  const projType   = (config.projType   || '').toLowerCase();
+  const landType   = (config.landType   || '').toLowerCase();
   const subsurface = (config.subsurface || '').toLowerCase();
+  const tokens = new Set(['*']);
 
-  // Build condition tokens
-  const tokens = new Set();
-  tokens.add('*'); // always included
-
-  // Project type tokens
   if (projType.includes('exploration')) tokens.add('exploration');
   if (projType.includes('leasing') || projType.includes('tgw')) { tokens.add('leasing'); tokens.add('exploration'); }
   if (projType.includes('development drilling')) { tokens.add('drilling'); tokens.add('leasing'); }
   if (projType.includes('power plant')) { tokens.add('utilization'); tokens.add('powerplant'); tokens.add('drilling'); }
-  if (projType.includes('full')) { tokens.add('exploration'); tokens.add('leasing'); tokens.add('drilling'); tokens.add('construction'); tokens.add('utilization'); tokens.add('powerplant'); tokens.add('full'); }
-  if (projType.includes('egs') || projType.includes('enhanced')) { tokens.add('drilling'); tokens.add('construction'); tokens.add('utilization'); tokens.add('powerplant'); tokens.add('full'); }
-
-  // Construction always included if drilling or beyond
+  if (projType.includes('full')) { ['exploration','leasing','drilling','construction','utilization','powerplant','full'].forEach(t => tokens.add(t)); }
+  if (projType.includes('egs') || projType.includes('enhanced')) { ['drilling','construction','utilization','powerplant','full'].forEach(t => tokens.add(t)); }
   if (tokens.has('drilling') || tokens.has('utilization')) tokens.add('construction');
 
-  // Land type tokens
-  if (landType.includes('blm')) tokens.add('blm');
+  if (landType.includes('blm'))   tokens.add('blm');
   if (landType.includes('usfs') || landType.includes('forest')) tokens.add('usfs');
   if (landType.includes('tribal')) tokens.add('tribal');
-
-  // Subsurface tokens
   if (subsurface.includes('federal') || subsurface.includes('blm')) tokens.add('blm');
 
-  // Environmental flag tokens
-  const checkedRows = document.querySelectorAll('.check-row.checked .check-label');
-  checkedRows.forEach(r => {
+  document.querySelectorAll('.check-row.checked .check-label').forEach(r => {
     const t = r.textContent;
-    if (t.includes('Wetlands')) tokens.add('wetlands');
+    if (t.includes('Wetlands'))     tokens.add('wetlands');
     if (t.includes('Transmission')) tokens.add('transmission');
-    if (t.includes('access road')) tokens.add('newroad');
-    if (t.includes('tribal')) tokens.add('tribal');
+    if (t.includes('access road'))  tokens.add('newroad');
+    if (t.includes('tribal'))       tokens.add('tribal');
   });
 
-  return ALL_PERMITS.filter(p => {
-    return p.conditions.some(c => c === '*' || tokens.has(c));
-  });
+  return ALL_PERMITS.filter(p => p.conditions.some(c => c === '*' || tokens.has(c)));
 }
 
 // ═══════════════════════════════════════
-// GENERATE — AI narrative + local permits
+// STORAGE HELPERS
+// ═══════════════════════════════════════
+const STORAGE_PREFIX = 'project:';
+
+async function getAllProjects() {
+  try {
+    const result = await window.storage.list(STORAGE_PREFIX);
+    if (!result || !result.keys || result.keys.length === 0) return [];
+    const projects = [];
+    for (const key of result.keys) {
+      try {
+        const item = await window.storage.get(key);
+        if (item) projects.push(JSON.parse(item.value));
+      } catch(e) { /* skip corrupt entries */ }
+    }
+    return projects.sort((a, b) => b.savedAt - a.savedAt);
+  } catch(e) { return []; }
+}
+
+async function saveProject(project) {
+  const key = STORAGE_PREFIX + project.id;
+  await window.storage.set(key, JSON.stringify(project));
+}
+
+async function deleteProject(id) {
+  await window.storage.delete(STORAGE_PREFIX + id);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ═══════════════════════════════════════
+// PROJECTS DRAWER
+// ═══════════════════════════════════════
+async function openProjectsDrawer() {
+  document.getElementById('projectsOverlay').classList.add('open');
+  document.getElementById('projectsDrawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  await refreshProjectsList();
+}
+
+function closeProjectsDrawer() {
+  document.getElementById('projectsOverlay').classList.remove('open');
+  document.getElementById('projectsDrawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+async function refreshProjectsList() {
+  const projects = await getAllProjects();
+  const list = document.getElementById('pdList');
+  const countEl = document.getElementById('pdCount');
+  const badgeEl = document.getElementById('projectsBadge');
+
+  badgeEl.textContent = projects.length;
+  countEl.textContent = `${projects.length} project${projects.length !== 1 ? 's' : ''}`;
+
+  if (projects.length === 0) {
+    list.innerHTML = `<div class="pd-empty"><div class="pd-empty-icon">🗂️</div><div>No saved projects yet</div><div style="font-size:10px;margin-top:4px;opacity:.7">Generate a checklist and click Save Project</div></div>`;
+    return;
+  }
+
+  list.innerHTML = projects.map(p => {
+    const done      = p.completed ? p.completed.length : 0;
+    const total     = p.permits ? p.permits.length : 0;
+    const critical  = p.permits ? p.permits.filter(x => x.critical).length : 0;
+    const pct       = total > 0 ? Math.round((done / total) * 100) : 0;
+    const isActive  = p.id === currentProjectId;
+    const dateStr   = new Date(p.savedAt).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+
+    return `
+    <div class="pd-card${isActive ? ' active-project' : ''}" onclick="loadProject('${p.id}')">
+      <div class="pd-card-top">
+        <div class="pd-card-name">${p.config.name}</div>
+        <div class="pd-card-actions">
+          <button class="pd-card-btn del" title="Delete project" onclick="confirmDeleteProject(event,'${p.id}')">🗑</button>
+        </div>
+      </div>
+      <div class="pd-card-meta">${p.config.state} · ${p.config.landType} · ${p.config.projType}${p.config.mw ? ` · ${p.config.mw} MW` : ''}</div>
+      <div class="pd-card-pills">
+        <span class="pd-pill pd-pill-permits">${total} permits</span>
+        <span class="pd-pill pd-pill-critical">${critical} critical</span>
+        ${done > 0 ? `<span class="pd-pill pd-pill-done">${done} completed</span>` : ''}
+        <span class="pd-pill pd-pill-date">${dateStr}</span>
+      </div>
+      ${total > 0 ? `
+      <div class="pd-progress">
+        <div class="pd-progress-bar"><div class="pd-progress-fill" style="width:${pct}%"></div></div>
+        <div class="pd-progress-label">${pct}% complete — ${done}/${total} permits checked</div>
+      </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function confirmDeleteProject(event, id) {
+  event.stopPropagation();
+  if (!confirm('Delete this project? This cannot be undone.')) return;
+  await deleteProject(id);
+  if (currentProjectId === id) {
+    currentProjectId = null;
+    // Don't clear results — just update badge
+  }
+  await refreshProjectsList();
+  showToast('Project deleted');
+}
+
+async function loadProject(id) {
+  const projects = await getAllProjects();
+  const p = projects.find(x => x.id === id);
+  if (!p) return;
+
+  closeProjectsDrawer();
+  currentProjectId = id;
+  currentConfig    = p.config;
+  currentPermits   = p.permits;
+  currentNarrative = p.narrative;
+
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('resultsContent').style.display = 'block';
+
+  renderResults(p.config, p.permits, p.narrative, p.flags || [], p.completed || [], id);
+  showToast(`Loaded: ${p.config.name}`);
+}
+
+// ═══════════════════════════════════════
+// SAVE CURRENT PROJECT
+// ═══════════════════════════════════════
+async function saveCurrentProject() {
+  if (!currentConfig || !currentPermits.length) return;
+
+  // Collect completed permit IDs from current DOM
+  const completed = [];
+  currentPermits.forEach(p => {
+    const el = document.getElementById('pci-' + p.id);
+    if (el && el.classList.contains('completed')) completed.push(p.id);
+  });
+
+  const id = currentProjectId || ('proj_' + Date.now());
+  currentProjectId = id;
+
+  const project = {
+    id,
+    config:    currentConfig,
+    permits:   currentPermits,
+    narrative: currentNarrative,
+    flags:     Array.from(document.querySelectorAll('.check-row.checked .check-label')).map(el => el.textContent),
+    completed,
+    savedAt:   Date.now(),
+  };
+
+  await saveProject(project);
+  await refreshProjectsList(); // update badge count
+
+  // Update save button state
+  const btn = document.getElementById('btnSaveProject');
+  if (btn) {
+    btn.classList.add('saved');
+    btn.textContent = '✓ Saved';
+  }
+
+  showToast('✓ Project saved');
+}
+
+// ═══════════════════════════════════════
+// GENERATE PERMITS
 // ═══════════════════════════════════════
 async function generatePermits() {
-  const name = document.getElementById('fName').value.trim();
-  const state = document.getElementById('fState').value;
+  const name     = document.getElementById('fName').value.trim();
+  const state    = document.getElementById('fState').value;
   const projType = chipSelections['projType'];
 
   if (!name || !state || !projType) {
@@ -623,107 +939,102 @@ async function generatePermits() {
   const config = {
     name,
     state,
-    landType: chipSelections['landType'] || 'BLM Federal',
+    landType:  chipSelections['landType']  || 'BLM Federal',
     subsurface: chipSelections['subsurface'] || 'Federal (BLM Lease)',
     projType,
-    mw: document.getElementById('fMW').value || '',
+    mw:   document.getElementById('fMW').value   || '',
     year: document.getElementById('fYear').value || '',
     notes: document.getElementById('fNotes').value.trim(),
   };
 
-  // Match permits locally (no API)
   const matchedPermits = matchPermits(config);
+  const flags = Array.from(document.querySelectorAll('.check-row.checked .check-label')).map(el => el.textContent);
 
-  // Get environmental flags
-  const flags = [];
-  document.querySelectorAll('.check-row.checked .check-label').forEach(el => flags.push(el.textContent));
-
-  // AI narrative — minimal prompt, all context pre-loaded
   const systemPrompt = `You are a geothermal regulatory expert familiar with the NREL RAPID Toolkit (openei.org/wiki/RAPID). Generate a 3-sentence project-specific permitting summary for the project described. Be specific, mention the state agency names, and flag the most critical permit path. Respond in plain text only, no markdown, no headers.`;
-
-  const userPrompt = `Project: ${config.name}
-State: ${config.state}
-Land: ${config.landType}
-Type: ${config.projType}${config.mw ? `, ${config.mw} MW` : ''}${config.year ? `, targeting ${config.year}` : ''}
-Env flags: ${flags.length > 0 ? flags.join('; ') : 'None noted'}
-${config.notes ? 'Notes: ' + config.notes : ''}`;
+  const userPrompt   = `Project: ${config.name}\nState: ${config.state}\nLand: ${config.landType}\nType: ${config.projType}${config.mw ? `, ${config.mw} MW` : ''}${config.year ? `, targeting ${config.year}` : ''}\nEnv flags: ${flags.length > 0 ? flags.join('; ') : 'None noted'}\n${config.notes ? 'Notes: ' + config.notes : ''}`;
 
   let narrative = '';
   try {
     const resp = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: userPrompt }]
-      })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system: systemPrompt, messages: [{ role: 'user', content: userPrompt }] })
     });
     const data = await resp.json();
     narrative = data.content?.[0]?.text || '';
-  } catch (e) {
+  } catch(e) {
     narrative = `This ${config.projType.toLowerCase()} project in ${config.state} will require coordination with ${config.landType.includes('BLM') ? 'the Bureau of Land Management' : 'the applicable surface management agency'} and the state regulatory agency. The critical path runs through NEPA review and the Geothermal Drilling Permit (GDP), which is not eligible for Categorical Exclusion. Early engagement with the relevant BLM Field Office is strongly recommended.`;
   }
 
   btn.classList.remove('loading');
   btn.disabled = false;
 
-  renderResults(config, matchedPermits, narrative, flags);
+  // New project — clear any previous ID so save creates a fresh record
+  currentProjectId = null;
+  currentConfig    = config;
+  currentPermits   = matchedPermits;
+  currentNarrative = narrative;
+
+  renderResults(config, matchedPermits, narrative, flags, [], null);
 }
 
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
 function buildSkeleton() {
   return `<div style="animation: fadeIn .4s ease forwards">
     <div class="skel skel-line" style="height:32px;width:50%;margin-bottom:16px"></div>
     <div class="skel skel-line" style="width:80%"></div>
     <div class="skel skel-line" style="width:65%"></div>
     <div class="skel skel-line skel-short"></div>
-    <div style="margin-top:24px">
-      <div class="skel skel-line" style="height:80px"></div>
-    </div>
+    <div style="margin-top:24px"><div class="skel skel-line" style="height:80px"></div></div>
     <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px">
       ${[1,2,3,4,5].map(() => `<div class="skel skel-line" style="height:60px"></div>`).join('')}
     </div>
   </div>`;
 }
 
-function renderResults(config, permits, narrative, flags) {
+function renderResults(config, permits, narrative, flags, completed = [], projectId = null) {
   const criticalCount = permits.filter(p => p.critical).length;
-  const phaseOrder = ['exploration','leasing','drilling','construction','utilization'];
-  const phaseLabels = {
-    exploration: '🔍 Phase 1 — Exploration',
-    leasing: '📋 Phase 2 — Leasing',
-    drilling: '⛏️ Phase 3 — Drilling',
-    construction: '🚧 Phase 4 — Construction',
-    utilization: '⚡ Phase 5 — Utilization',
-  };
-
-  // Estimate timeline
-  const hasFullDev = config.projType.toLowerCase().includes('full') || config.projType.toLowerCase().includes('power');
-  const timelineEst = hasFullDev ? '4–8 years (full development)' : config.projType.toLowerCase().includes('drilling') ? '2–4 years' : '6–18 months';
-
-  // Group by phase
-  const byPhase = {};
+  const phaseOrder    = ['exploration','leasing','drilling','construction','utilization'];
+  const phaseLabels   = { exploration:'🔍 Phase 1 — Exploration', leasing:'📋 Phase 2 — Leasing', drilling:'⛏️ Phase 3 — Drilling', construction:'🚧 Phase 4 — Construction', utilization:'⚡ Phase 5 — Utilization' };
+  const hasFullDev    = config.projType.toLowerCase().includes('full') || config.projType.toLowerCase().includes('power');
+  const byPhase       = {};
   phaseOrder.forEach(p => { byPhase[p] = []; });
-  permits.forEach(p => { if (byPhase[p.phase]) byPhase[p.phase].push(p); });
+  permits.forEach(p  => { if (byPhase[p.phase]) byPhase[p.phase].push(p); });
+
+  const isSaved   = !!projectId;
+  const doneCount = completed.length;
+  const pct       = permits.length > 0 ? Math.round((doneCount / permits.length) * 100) : 0;
 
   const html = `
   <div class="fade-in">
 
+    <!-- SAVE BAR -->
+    <div class="save-bar">
+      <div class="save-bar-left">
+        <div class="save-bar-icon">💾</div>
+        <div class="save-bar-text">${isSaved
+          ? `<strong>Saved project</strong> — completion: ${pct}% (${doneCount}/${permits.length} permits)`
+          : 'Save this checklist to track progress and access it later'}</div>
+      </div>
+      <button class="btn-save${isSaved ? ' saved' : ''}" id="btnSaveProject" onclick="saveCurrentProject()" ${isSaved ? 'disabled' : ''}>
+        ${isSaved ? '✓ Saved' : '💾 Save Project'}
+      </button>
+    </div>
+
     <div class="results-header">
       <div>
-        <div class="results-label">Generated Permit Checklist</div>
+        <div class="results-eyebrow">Generated Permit Checklist</div>
         <div class="results-title">${config.name}</div>
         <div class="results-meta">${config.state} · ${config.landType} · ${config.projType}${config.mw ? ` · ${config.mw} MW` : ''}</div>
       </div>
       <div class="results-summary">
         <div class="summary-pill pill-total">
-          <div>${permits.length}</div>
-          <div>Permits</div>
+          <div>${permits.length}</div><div>Permits</div>
         </div>
         <div class="summary-pill pill-critical">
-          <div>${criticalCount}</div>
-          <div>Critical Path</div>
+          <div>${criticalCount}</div><div>Critical</div>
         </div>
         <div class="summary-pill pill-timeline">
           <div style="font-size:13px">${hasFullDev ? '4–8' : config.projType.toLowerCase().includes('drilling') ? '2–4' : '1–2'}</div>
@@ -740,7 +1051,7 @@ function renderResults(config, permits, narrative, flags) {
     ${criticalCount > 0 ? `<div class="critical-notice">
       <div class="critical-notice-icon">⚠️</div>
       <div class="critical-notice-text">
-        <strong>${criticalCount} critical-path permits</strong> identified for this project. These require the longest lead times and should be initiated first. NEPA review timelines (1–4 years) typically govern the overall schedule — start early engagement with BLM.
+        <strong>${criticalCount} critical-path permits</strong> identified. These require the longest lead times — initiate them first. NEPA timelines (1–4 years) typically govern overall schedule.
       </div>
     </div>` : ''}
 
@@ -749,13 +1060,13 @@ function renderResults(config, permits, narrative, flags) {
       if (!phasePerms || phasePerms.length === 0) return '';
       return `<div class="phase-section">
         <div class="phase-section-header">
-          <div class="phase-section-title">${phaseLabels[phase] || phase}</div>
+          <div class="phase-section-title">${phaseLabels[phase]}</div>
           <div class="phase-count-badge">${phasePerms.length} permit${phasePerms.length !== 1 ? 's' : ''}</div>
         </div>
         <div class="permit-checklist">
           ${phasePerms.map(p => `
-            <div class="permit-check-item${p.critical ? ' critical' : ''}" id="pci-${p.id}">
-              <div class="pci-check" onclick="toggleComplete('${p.id}', event)"></div>
+            <div class="permit-check-item${p.critical ? ' critical' : ''}${completed.includes(p.id) ? ' completed' : ''}" id="pci-${p.id}" onclick="toggleComplete('${p.id}', event)">
+              <div class="pci-check"></div>
               <div class="pci-info">
                 <div class="pci-name">${p.critical ? '⚡ ' : ''}${p.name}</div>
                 <div class="pci-agency">${p.agency} · ${p.form}</div>
@@ -768,8 +1079,7 @@ function renderResults(config, permits, narrative, flags) {
                   ${p.nepa && p.nepa.includes('NOT CX') ? '<span class="pci-tag tag-crit">NO CX</span>' : ''}
                 </div>
               </div>
-            </div>
-          `).join('')}
+            </div>`).join('')}
         </div>
       </div>`;
     }).join('')}
@@ -777,19 +1087,16 @@ function renderResults(config, permits, narrative, flags) {
     ${flags.length > 0 ? `<div class="critical-notice" style="border-color:rgba(245,166,35,0.3);background:var(--amber-dim)">
       <div class="critical-notice-icon">🚩</div>
       <div class="critical-notice-text">
-        <strong style="color:var(--amber)">Environmental flags noted:</strong> ${flags.join(' · ')}<br>
-        Additional permits may be required. Consult with BLM and applicable state agencies.
+        <strong style="color:var(--amber)">Environmental flags noted:</strong> ${flags.join(' · ')}<br>Additional permits may be required.
       </div>
     </div>` : ''}
 
     <div class="rapid-ref">
       <div class="rapid-ref-info">
         <div class="rapid-ref-title">Verify with RAPID Toolkit</div>
-        <div class="rapid-ref-sub">Cross-reference this checklist with the state-specific RAPID Geothermal roadmap for ${config.state}. RAPID includes detailed flowcharts, agency contacts, and regulatory citations.</div>
+        <div class="rapid-ref-sub">Cross-reference with the state-specific RAPID Geothermal roadmap for ${config.state}.</div>
       </div>
-      <a href="https://openei.org/wiki/RAPID/Geothermal" target="_blank" class="rapid-ref-btn">
-        📚 Open RAPID Toolkit ↗
-      </a>
+      <a href="https://openei.org/wiki/RAPID/Geothermal" target="_blank" class="rapid-ref-btn">📚 Open RAPID ↗</a>
     </div>
 
   </div>`;
@@ -797,11 +1104,56 @@ function renderResults(config, permits, narrative, flags) {
   document.getElementById('resultsContent').innerHTML = html;
 }
 
+// ═══════════════════════════════════════
+// TOGGLE COMPLETE + AUTO-SAVE
+// ═══════════════════════════════════════
 function toggleComplete(id, event) {
   event.stopPropagation();
   const el = document.getElementById('pci-' + id);
   el.classList.toggle('completed');
+
+  // If this project is already saved, auto-persist completion changes
+  if (currentProjectId) {
+    autoSaveCompletions();
+  }
 }
+
+let autoSaveTimer = null;
+async function autoSaveCompletions() {
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(async () => {
+    if (!currentProjectId || !currentConfig) return;
+    const completed = [];
+    currentPermits.forEach(p => {
+      const el = document.getElementById('pci-' + p.id);
+      if (el && el.classList.contains('completed')) completed.push(p.id);
+    });
+
+    const project = {
+      id:        currentProjectId,
+      config:    currentConfig,
+      permits:   currentPermits,
+      narrative: currentNarrative,
+      flags:     [],
+      completed,
+      savedAt:   Date.now(),
+    };
+    await saveProject(project);
+    await refreshProjectsList();
+  }, 800); // debounce 800ms
+}
+
+// ═══════════════════════════════════════
+// INIT — load badge count on page load
+// ═══════════════════════════════════════
+(async () => {
+  try {
+    const projects = await getAllProjects();
+    document.getElementById('projectsBadge').textContent = projects.length;
+  } catch(e) {
+    document.getElementById('projectsBadge').textContent = '0';
+  }
+})();
 </script>
 </body>
 </html>
