@@ -1,4 +1,6 @@
 {
+  "framework": null,
+  "outputDirectory": ".",
   "rewrites": [
     { "source": "/rapid-dashboard", "destination": "/rapid-dashboard.html" },
     { "source": "/rapid-new-project", "destination": "/rapid-new-project.html" },
