@@ -18,11 +18,16 @@ export default async function handler(req, res) {
   }
 
   try {
-    const body = req.body;
+    // Vercel auto-parses JSON bodies — req.body should already be an object
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
 
-    // Only add web-search beta header when the request actually uses that tool
+    if (!body || typeof body !== 'object') {
+      return res.status(400).json({ error: 'Invalid request body' });
+    }
+
+    // Only add web-search beta header when the request uses that tool
     const usesWebSearch = Array.isArray(body.tools) &&
-      body.tools.some(t => t.type && t.type.includes('web_search'));
+      body.tools.some(t => typeof t.type === 'string' && t.type.includes('web_search'));
 
     const headers = {
       'Content-Type': 'application/json',
@@ -40,8 +45,9 @@ export default async function handler(req, res) {
       body: JSON.stringify(body),
     });
 
-    // Read as text first — safely handles unexpected HTML error pages
+    // Read as text first — handles unexpected HTML error pages gracefully
     const rawBody = await response.text();
+
     let data;
     try {
       data = JSON.parse(rawBody);
@@ -54,6 +60,7 @@ export default async function handler(req, res) {
     }
 
     return res.status(response.status).json(data);
+
   } catch (err) {
     return res.status(500).json({ error: 'Proxy error', detail: err.message });
   }
