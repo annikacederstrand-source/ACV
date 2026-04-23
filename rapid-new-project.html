@@ -8,12 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Barlow:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:        #0b0c10;
-    --surface:   #11121a;
-    --surface2:  #181922;
-    --surface3:  #1e2030;
-    --border:    #22243a;
-    --border2:   #30335a;
+    --bg:        #13151f;
+    --surface:   #1b1d2b;
+    --surface2:  #222438;
+    --surface3:  #282a42;
+    --border:    #2e3050;
+    --border2:   #3d4070;
     --fervo:     #7c6ff7;
     --fervo2:    #9b96fa;
     --fervo3:    #c4c0fd;
@@ -27,9 +27,9 @@
     --sky:       #5badff;
     --sky-dim:   rgba(91,173,255,0.10);
     --red-dim:   rgba(124,111,247,0.10);
-    --text:      #e8eaf8;
-    --text-dim:  #8890b0;
-    --text-faint:#3a3f60;
+    --text:      #f0f2ff;
+    --text-dim:  #9da4c8;
+    --text-faint:#525880;
     --mono:    'IBM Plex Mono', monospace;
     --sans:    'Barlow', sans-serif;
     --display: 'Barlow Condensed', sans-serif;
@@ -58,7 +58,7 @@
     position: sticky; top: 0; z-index: 100;
     display: flex; align-items: center; justify-content: space-between;
     padding: 0 32px; height: 60px;
-    background: rgba(11,12,16,0.94); backdrop-filter: blur(14px);
+    background: rgba(19,21,31,0.95); backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--border);
   }
   .nav-brand { display: flex; align-items: center; gap: 14px; }
@@ -1373,14 +1373,15 @@ const STORAGE_PREFIX = 'project:';
 
 async function getAllProjects() {
   try {
-    const result = await window.storage.list(STORAGE_PREFIX);
-    if (!result || !result.keys || result.keys.length === 0) return [];
     const projects = [];
-    for (const key of result.keys) {
-      try {
-        const item = await window.storage.get(key);
-        if (item) projects.push(JSON.parse(item.value));
-      } catch(e) { /* skip corrupt entries */ }
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(STORAGE_PREFIX)) {
+        try {
+          const val = localStorage.getItem(key);
+          if (val) projects.push(JSON.parse(val));
+        } catch(e) { /* skip corrupt entries */ }
+      }
     }
     return projects.sort((a, b) => b.savedAt - a.savedAt);
   } catch(e) { return []; }
@@ -1388,11 +1389,11 @@ async function getAllProjects() {
 
 async function saveProject(project) {
   const key = STORAGE_PREFIX + project.id;
-  await window.storage.set(key, JSON.stringify(project));
+  localStorage.setItem(key, JSON.stringify(project));
 }
 
 async function deleteProject(id) {
-  await window.storage.delete(STORAGE_PREFIX + id);
+  localStorage.removeItem(STORAGE_PREFIX + id);
 }
 
 function showToast(msg) {
@@ -1604,12 +1605,311 @@ async function generatePermits() {
   verifyPermits(config, matchedPermits);
 }
 
-// ═══════════════════════════════════════
-// STEP 2 — VERIFY PERMITS (AGENTIC)
-// Second agent reviews the permit list,
-// fetches live RAPID data, flags issues
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════════
+// STEP 2 — INDEPENDENT VERIFICATION AGENT
+//
+// Architecture:
+//   Agent 1 (generatePermits) → hardcoded RAPID database → permit list
+//   Agent 2 (verifyPermits)   → independently queries RAPID via web
+//                               search → builds its own list → compares
+//                               against Agent 1 → flags discrepancies
+//                               for attorney review
+// ═══════════════════════════════════════════════════════════════════
 async function verifyPermits(config, permits) {
+  const verifyEl = document.getElementById('verifyPanel');
+  if (!verifyEl) return;
+
+  // Show running state with two-step progress indicator
+  verifyEl.innerHTML = `
+    <div class="verify-header">
+      <div class="verify-header-left">
+        <span style="font-size:16px">🔍</span>
+        <span class="verify-title">Independent Verification Agent</span>
+        <span class="verify-status running">Querying RAPID Toolkit…</span>
+      </div>
+    </div>
+    <div style="padding:16px 18px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--text-faint);margin-bottom:14px;letter-spacing:0.05em;">
+        A second agent is independently querying RAPID (openei.org/wiki/RAPID/Geothermal/${config.state}) with the same project specs and will compare its findings against the generated checklist. Discrepancies are flagged for attorney review.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div id="vStep1" style="display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--text-dim);">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--fervo);animation:pulse 1s ease-in-out infinite;flex-shrink:0;"></div>
+          Step 1 — Searching RAPID Toolkit for ${config.state} geothermal permits…
+        </div>
+        <div id="vStep2" style="display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--text-faint);">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--border2);flex-shrink:0;"></div>
+          Step 2 — Comparing against generated checklist, flagging discrepancies…
+        </div>
+      </div>
+    </div>`;
+
+  // Build compact summary of Agent 1's output for comparison
+  const agent1Summary = permits.map(p =>
+    `${p.name} | ${p.agency} | ${p.form} | ${p.timeline} | ${p.citation || ''}`
+  ).join('\n');
+
+  // ── SYSTEM PROMPT ──
+  // Agent 2 is told nothing about Agent 1's output upfront.
+  // It queries RAPID independently, then compares.
+  const verifySystem = `You are an independent geothermal regulatory attorney conducting a second-opinion review of a permit checklist. You have no prior knowledge of what the first system generated — you must independently determine the correct permits by searching the NREL RAPID Toolkit.
+
+Your workflow:
+1. Use the web_search tool to search openei.org/wiki/RAPID/Geothermal for the specified state
+2. Independently determine what permits are required for the described project
+3. Compare your independent findings against the "Agent 1 Output" provided
+4. Flag every discrepancy — missing permits, wrong agencies, incorrect forms, outdated citations, unrealistic timelines
+
+You MUST respond with ONLY a raw JSON object. No markdown fences. No prose before or after. Start with { end with }.
+
+Schema:
+{
+  "agentSources": ["list of RAPID URLs you actually searched"],
+  "overallAssessment": "CONSISTENT | MINOR_DISCREPANCIES | SIGNIFICANT_DISCREPANCIES | REVIEW_REQUIRED",
+  "executiveSummary": "2-3 sentence summary for attorney review — note confidence level and any major gaps",
+  "discrepancies": [
+    {
+      "type": "MISSING_FROM_CHECKLIST | INCORRECT_AGENCY | WRONG_FORM | OUTDATED_CITATION | TIMELINE_MISMATCH | EXTRA_PERMIT | SEQUENCE_ERROR",
+      "permitName": "permit name",
+      "agent1Value": "what Agent 1 said, or null if missing",
+      "agent2Value": "what you independently found from RAPID",
+      "severity": "CRITICAL | MODERATE | MINOR",
+      "attorneyNote": "specific note for legal review — cite the RAPID source URL"
+    }
+  ],
+  "confirmedCorrect": ["list of permit names that independently verified as correct"],
+  "recommendedActions": ["list of specific actions attorney should take before relying on this checklist"]
+}`;
+
+  const verifyUser = `PROJECT SPECS (same as given to Agent 1):
+State: ${config.state}
+Land Type: ${config.landType}
+Project Type: ${config.projType}${config.mw ? `\nCapacity: ${config.mw} MW` : ''}${config.year ? `\nTarget Year: ${config.year}` : ''}
+${config.notes ? `Notes: ${config.notes}` : ''}
+
+AGENT 1 OUTPUT (the checklist you are auditing):
+${agent1Summary}
+
+INSTRUCTIONS:
+1. Search RAPID Toolkit for ${config.state} geothermal permitting: openei.org/wiki/RAPID/Geothermal/${config.state}
+2. Also search for specific topics where you have questions (drilling, water rights, power plant, etc.)
+3. Build your own independent permit list from what RAPID actually says
+4. Compare against Agent 1's output above — report every discrepancy
+5. Flag anything that requires attorney review before the checklist is relied upon`;
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 4000,
+        system: verifySystem,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: verifyUser }],
+      })
+    });
+
+    // Update progress indicator to step 2
+    const step1El = document.getElementById('vStep1');
+    const step2El = document.getElementById('vStep2');
+    if (step1El) step1El.style.color = 'var(--green)';
+    if (step1El) step1El.querySelector('div').style.background = 'var(--green)';
+    if (step1El) step1El.querySelector('div').style.animation = 'none';
+    if (step2El) step2El.style.color = 'var(--text-dim)';
+    if (step2El) step2El.querySelector('div').style.background = 'var(--fervo)';
+    if (step2El) step2El.querySelector('div').style.animation = 'pulse 1s ease-in-out infinite';
+
+    const rawBody = await resp.text();
+
+    if (!resp.ok) {
+      throw new Error(`API ${resp.status}: ${rawBody.substring(0, 300)}`);
+    }
+
+    let data;
+    try { data = JSON.parse(rawBody); }
+    catch { throw new Error(`Non-JSON response: ${rawBody.substring(0, 200)}`); }
+
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
+
+    // Extract final text block (after web_search tool use blocks)
+    const textBlock = data.content?.filter(b => b.type === 'text').pop();
+    if (!textBlock?.text) throw new Error('No text in verifier response');
+
+    // Extract JSON robustly
+    let raw = textBlock.text.trim();
+    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+    const j0 = raw.indexOf('{'), j1 = raw.lastIndexOf('}');
+    if (j0 === -1 || j1 === -1) throw new Error('No JSON found: ' + raw.substring(0, 100));
+    const result = JSON.parse(raw.slice(j0, j1 + 1));
+
+    renderVerification(result, config, permits);
+
+  } catch(e) {
+    console.error('Verification error:', e);
+    const el = document.getElementById('verifyPanel');
+    if (el) el.innerHTML = `
+      <div class="verify-header">
+        <div class="verify-header-left">
+          <span style="font-size:16px">🔍</span>
+          <span class="verify-title">Independent Verification Agent</span>
+          <span class="verify-status error">Verification failed</span>
+        </div>
+        <button class="verify-rerun" onclick="verifyPermits(currentConfig, currentPermits)">↺ Retry</button>
+      </div>
+      <div class="verify-summary" style="color:var(--text-faint);">
+        ${e.message}<br><br>
+        Cross-check manually at:
+        <a href="https://openei.org/wiki/RAPID/Geothermal/${config.state}" target="_blank" style="color:var(--fervo2);">
+          openei.org/wiki/RAPID/Geothermal/${config.state}
+        </a>
+      </div>`;
+  }
+}
+
+// ═══════════════════════════════════════
+// RENDER VERIFICATION RESULTS
+// ═══════════════════════════════════════
+function renderVerification(result, config, permits) {
+  const verifyEl = document.getElementById('verifyPanel');
+  if (!verifyEl) return;
+
+  const discrepancies = result.discrepancies || [];
+  const confirmed     = result.confirmedCorrect || [];
+  const actions       = result.recommendedActions || [];
+
+  const critical = discrepancies.filter(d => d.severity === 'CRITICAL').length;
+  const moderate = discrepancies.filter(d => d.severity === 'MODERATE').length;
+  const minor    = discrepancies.filter(d => d.severity === 'MINOR').length;
+
+  const assessmentStyle = {
+    CONSISTENT:              { cls: 'done',    icon: '✓', label: 'Consistent' },
+    MINOR_DISCREPANCIES:     { cls: 'running', icon: '⚠', label: 'Minor Discrepancies' },
+    SIGNIFICANT_DISCREPANCIES:{ cls: 'error',  icon: '✗', label: 'Significant Discrepancies' },
+    REVIEW_REQUIRED:         { cls: 'error',   icon: '⚠', label: 'Attorney Review Required' },
+  }[result.overallAssessment] || { cls: 'running', icon: '?', label: result.overallAssessment };
+
+  const severityColor = { CRITICAL: 'var(--fervo2)', MODERATE: 'var(--amber)', MINOR: 'var(--text-dim)' };
+  const typeLabel = {
+    MISSING_FROM_CHECKLIST: '+ MISSING',
+    INCORRECT_AGENCY:       '✗ WRONG AGENCY',
+    WRONG_FORM:             '✗ WRONG FORM',
+    OUTDATED_CITATION:      '⚠ OUTDATED',
+    TIMELINE_MISMATCH:      '⚠ TIMELINE',
+    EXTRA_PERMIT:           '? EXTRA',
+    SEQUENCE_ERROR:         '⚠ SEQUENCE',
+  };
+
+  verifyEl.innerHTML = `
+    <div class="verify-header">
+      <div class="verify-header-left">
+        <span style="font-size:16px">🔍</span>
+        <span class="verify-title">Independent Verification — Agent 2</span>
+        <span class="verify-status ${assessmentStyle.cls}">${assessmentStyle.icon} ${assessmentStyle.label}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--text-faint);display:flex;gap:10px;">
+          ${critical ? `<span style="color:var(--fervo2);">✗ ${critical} critical</span>` : ''}
+          ${moderate ? `<span style="color:var(--amber);">⚠ ${moderate} moderate</span>` : ''}
+          ${minor    ? `<span style="color:var(--text-dim);">${minor} minor</span>` : ''}
+          ${confirmed.length ? `<span style="color:var(--green);">✓ ${confirmed.length} confirmed</span>` : ''}
+        </div>
+        <button class="verify-rerun" onclick="verifyPermits(currentConfig, currentPermits)">↺ Re-run</button>
+      </div>
+    </div>
+
+    <!-- Attorney Banner -->
+    <div style="background:rgba(124,111,247,0.08);border-bottom:1px solid var(--border);padding:12px 18px;display:flex;align-items:flex-start;gap:10px;">
+      <div style="font-size:16px;flex-shrink:0;">⚖️</div>
+      <div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--fervo2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">For Attorney Review</div>
+        <div style="font-size:12px;color:var(--text-dim);line-height:1.6;font-weight:300;">${result.executiveSummary}</div>
+        ${result.agentSources?.length ? `<div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:6px;">Sources searched: ${result.agentSources.join(' · ')}</div>` : ''}
+      </div>
+    </div>
+
+    ${discrepancies.length === 0 ? `
+    <div style="padding:16px 18px;font-family:var(--mono);font-size:11px;color:var(--green);display:flex;align-items:center;gap:8px;">
+      <span>✓</span> No discrepancies found — Agent 2's independent RAPID query is consistent with the generated checklist.
+    </div>` : ''}
+
+    ${discrepancies.length > 0 ? `
+    <div class="verify-list">
+      <div style="padding:10px 18px 6px;font-family:var(--mono);font-size:9px;color:var(--text-faint);letter-spacing:0.1em;text-transform:uppercase;border-bottom:1px solid var(--border);">
+        Discrepancies (${discrepancies.length}) — flagged for attorney review
+      </div>
+      ${discrepancies.map(d => `
+        <div class="verify-item" style="border-left:3px solid ${severityColor[d.severity] || 'var(--border)'};">
+          <div class="verify-icon" style="color:${severityColor[d.severity]}">
+            ${d.severity === 'CRITICAL' ? '✗' : d.severity === 'MODERATE' ? '⚠' : '·'}
+          </div>
+          <div class="verify-item-body">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+              <div class="verify-item-permit">${d.permitName}</div>
+              <div style="font-family:var(--mono);font-size:9px;padding:1px 6px;border-radius:2px;background:rgba(255,255,255,0.06);color:var(--text-faint);">${typeLabel[d.type] || d.type}</div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px;">
+              <div style="font-size:10px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:6px 9px;">
+                <div style="font-family:var(--mono);font-size:8px;color:var(--text-faint);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;">Agent 1 (Checklist)</div>
+                <div style="color:var(--text-dim);line-height:1.4;">${d.agent1Value || '<em style="opacity:.5">Not present</em>'}</div>
+              </div>
+              <div style="font-size:10px;background:var(--surface2);border:1px solid rgba(124,111,247,0.25);border-radius:4px;padding:6px 9px;">
+                <div style="font-family:var(--mono);font-size:8px;color:var(--fervo2);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;">Agent 2 (RAPID Query)</div>
+                <div style="color:var(--text);line-height:1.4;">${d.agent2Value || '<em style="opacity:.5">Not found</em>'}</div>
+              </div>
+            </div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--amber);background:var(--amber-dim);border:1px solid rgba(245,166,35,.2);border-radius:3px;padding:5px 9px;line-height:1.5;">
+              ⚖️ ${d.attorneyNote}
+            </div>
+          </div>
+          <div class="verify-badge badge-${d.severity.toLowerCase()}" style="white-space:nowrap;">${d.severity}</div>
+        </div>`).join('')}
+    </div>` : ''}
+
+    ${confirmed.length > 0 ? `
+    <div style="border-top:1px solid var(--border);">
+      <div style="padding:10px 18px 6px;font-family:var(--mono);font-size:9px;color:var(--text-faint);letter-spacing:0.1em;text-transform:uppercase;">
+        Confirmed Correct (${confirmed.length})
+      </div>
+      <div style="padding:6px 18px 12px;display:flex;flex-wrap:wrap;gap:5px;">
+        ${confirmed.map(name => `
+          <span style="font-family:var(--mono);font-size:9px;padding:3px 9px;border-radius:2px;background:var(--green-dim);color:var(--green);border:1px solid rgba(61,214,140,.2);">✓ ${name}</span>
+        `).join('')}
+      </div>
+    </div>` : ''}
+
+    ${actions.length > 0 ? `
+    <div style="border-top:1px solid var(--border);padding:14px 18px;background:rgba(124,111,247,0.04);">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--fervo2);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px;">⚖️ Recommended Attorney Actions</div>
+      ${actions.map((a, i) => `
+        <div style="display:flex;gap:10px;margin-bottom:7px;font-size:12px;color:var(--text-dim);line-height:1.5;">
+          <span style="font-family:var(--mono);color:var(--fervo2);flex-shrink:0;">${i + 1}.</span>
+          <span>${a}</span>
+        </div>`).join('')}
+    </div>` : ''}`;
+
+  // Stamp visual flags on discrepant permit rows in the checklist
+  discrepancies.forEach(d => {
+    const nameEls = document.querySelectorAll('.permit-check-item .pci-name');
+    nameEls.forEach(el => {
+      const matchText = d.permitName.substring(0, 25).toLowerCase();
+      if (el.textContent.toLowerCase().includes(matchText)) {
+        const row = el.closest('.permit-check-item');
+        if (row && !row.querySelector('.verifier-flag')) {
+          row.style.borderLeftColor = severityColor[d.severity];
+          row.style.borderLeftWidth = '3px';
+          const badge = document.createElement('div');
+          badge.className = 'verifier-flag';
+          badge.style.cssText = `font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:2px;margin-top:5px;display:inline-block;background:${d.severity === 'CRITICAL' ? 'var(--red-dim)' : 'var(--amber-dim)'};color:${d.severity === 'CRITICAL' ? 'var(--fervo2)' : 'var(--amber)'};border:1px solid ${d.severity === 'CRITICAL' ? 'rgba(124,111,247,.3)' : 'rgba(245,166,35,.3)'};`;
+          badge.textContent = `⚖️ ${d.severity} — ${typeLabel[d.type] || d.type}`;
+          el.closest('.pci-info')?.appendChild(badge);
+        }
+      }
+    });
+  });
+}
+
+
   // Show verification panel in "running" state
   const verifyEl = document.getElementById('verifyPanel');
   if (!verifyEl) return;
@@ -1633,209 +1933,7 @@ async function verifyPermits(config, permits) {
         </div>`).join('')}
     </div>`;
 
-  // Build a compact permit list for the verifier
-  const permitSummary = permits.map(p =>
-    `- ${p.name} | Agency: ${p.agency} | Form: ${p.form} | Timeline: ${p.timeline} | Citation: ${p.citation || 'N/A'}`
-  ).join('\n');
 
-  const verifySystem = `You are a strict regulatory compliance auditor specializing in geothermal permitting in the western United States, with deep knowledge of the NREL RAPID Toolkit (openei.org/wiki/RAPID/Geothermal).
-
-Review the permit checklist provided and verify each item against your knowledge of current RAPID Toolkit data, BLM regulations, and state agency requirements.
-
-You MUST respond with ONLY a raw JSON object. No markdown. No backticks. No explanation before or after. Start your response with { and end with }. Use exactly this structure:
-{"summary":"2-sentence overall assessment","overallStatus":"VERIFIED","items":[{"permitName":"name","status":"CONFIRMED","finding":"1-sentence finding","correction":null}],"missingPermits":[]}
-
-Valid values: overallStatus = VERIFIED | NEEDS_REVIEW | ISSUES_FOUND. item status = CONFIRMED | UPDATED | FLAGGED. correction = string or null.`;
-
-  const verifyUser = `Verify this permit checklist for a ${config.projType} geothermal project in ${config.state} on BLM federal land${config.mw ? `, ${config.mw} MW` : ''}${config.year ? `, targeting ${config.year}` : ''}.
-
-For each permit, verify: (1) is the agency name correct and currently active, (2) is the form number accurate, (3) is the timeline realistic, (4) is the citation current. Flag anything outdated, renamed, or incorrect.
-Also identify any permits clearly missing for this project type and state.
-
-PERMIT LIST:
-${permitSummary}`;
-
-  try {
-    const resp = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        system: verifySystem,
-        messages: [{ role: 'user', content: verifyUser }]
-      })
-    });
-
-    // Always read as text first — avoids JSON parse crash on HTML error pages
-    const rawBody = await resp.text();
-
-    if (!resp.ok) {
-      throw new Error(`API returned HTTP ${resp.status}: ${rawBody.substring(0, 300)}`);
-    }
-
-    // Parse the outer Anthropic response envelope
-    let data;
-    try {
-      data = JSON.parse(rawBody);
-    } catch(parseErr) {
-      throw new Error(`API response was not JSON: ${rawBody.substring(0, 200)}`);
-    }
-
-    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-
-    // Extract the final text content block
-    const textBlock = data.content?.filter(b => b.type === 'text').pop();
-    if (!textBlock?.text) throw new Error('No text block in verifier response');
-
-    // Robustly extract the JSON object from the text
-    let raw = textBlock.text.trim();
-    raw = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
-    const jsonStart = raw.indexOf('{');
-    const jsonEnd   = raw.lastIndexOf('}');
-    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON object in verifier text: ' + raw.substring(0, 100));
-    raw = raw.slice(jsonStart, jsonEnd + 1);
-
-    const result = JSON.parse(raw);
-    renderVerification(result, config, permits);
-
-  } catch(e) {
-    console.error('Verification error:', e);
-    const verifyEl = document.getElementById('verifyPanel');
-    if (verifyEl) {
-      verifyEl.innerHTML = `
-        <div class="verify-header">
-          <div class="verify-header-left">
-            <span style="font-size:16px">🔍</span>
-            <span class="verify-title">Permit Verification Agent</span>
-            <span class="verify-status error">Verification unavailable</span>
-          </div>
-          <button class="verify-rerun" onclick="verifyPermits(currentConfig, currentPermits)">↺ Retry</button>
-        </div>
-        <div class="verify-summary" style="color:var(--text-faint)">
-          Could not complete live verification — RAPID Toolkit data may be temporarily unavailable. The permit list above is based on hardcoded RAPID data. Manually cross-check at <a href="https://openei.org/wiki/RAPID/Geothermal/${config.state}" target="_blank" style="color:var(--fervo2)">openei.org/wiki/RAPID/Geothermal/${config.state}</a>.
-        </div>`;
-    }
-  }
-}
-
-// ═══════════════════════════════════════
-// RENDER VERIFICATION RESULTS
-// ═══════════════════════════════════════
-function renderVerification(result, config, permits) {
-  const verifyEl = document.getElementById('verifyPanel');
-  if (!verifyEl) return;
-
-  const statusColor = {
-    VERIFIED:     'var(--green)',
-    NEEDS_REVIEW: 'var(--amber)',
-    ISSUES_FOUND: 'var(--fervo2)',
-  };
-  const statusLabel = {
-    VERIFIED:     '✓ Verified',
-    NEEDS_REVIEW: '⚠ Needs Review',
-    ISSUES_FOUND: '✗ Issues Found',
-  };
-  const statusClass = {
-    VERIFIED:     'done',
-    NEEDS_REVIEW: 'running',
-    ISSUES_FOUND: 'error',
-  };
-
-  const confirmedCount = result.items?.filter(i => i.status === 'CONFIRMED').length || 0;
-  const updatedCount   = result.items?.filter(i => i.status === 'UPDATED').length || 0;
-  const flaggedCount   = result.items?.filter(i => i.status === 'FLAGGED').length || 0;
-  const missingCount   = result.missingPermits?.length || 0;
-
-  const iconFor = status => ({
-    CONFIRMED: '✓',
-    UPDATED:   '⚠',
-    FLAGGED:   '✗',
-    MISSING:   '+',
-  }[status] || '?');
-
-  const colorFor = status => ({
-    CONFIRMED: 'var(--green)',
-    UPDATED:   'var(--amber)',
-    FLAGGED:   'var(--fervo2)',
-    MISSING:   'var(--sky)',
-  }[status] || 'var(--text-dim)');
-
-  verifyEl.innerHTML = `
-    <div class="verify-header">
-      <div class="verify-header-left">
-        <span style="font-size:16px">🔍</span>
-        <span class="verify-title">Permit Verification Agent</span>
-        <span class="verify-status ${statusClass[result.overallStatus] || 'done'}">
-          ${statusLabel[result.overallStatus] || result.overallStatus}
-        </span>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;">
-        <div style="font-family:var(--mono);font-size:10px;color:var(--text-faint);display:flex;gap:12px;">
-          ${confirmedCount ? `<span style="color:var(--green)">✓ ${confirmedCount} confirmed</span>` : ''}
-          ${updatedCount   ? `<span style="color:var(--amber)">⚠ ${updatedCount} updated</span>` : ''}
-          ${flaggedCount   ? `<span style="color:var(--fervo2)">✗ ${flaggedCount} flagged</span>` : ''}
-          ${missingCount   ? `<span style="color:var(--sky)">+ ${missingCount} missing</span>` : ''}
-        </div>
-        <button class="verify-rerun" onclick="verifyPermits(currentConfig, currentPermits)">↺ Re-verify</button>
-      </div>
-    </div>
-
-    <div class="verify-summary">${result.summary}</div>
-
-    <div class="verify-list">
-      ${(result.items || []).map(item => `
-        <div class="verify-item">
-          <div class="verify-icon" style="color:${colorFor(item.status)}">${iconFor(item.status)}</div>
-          <div class="verify-item-body">
-            <div class="verify-item-permit">${item.permitName}</div>
-            <div class="verify-item-finding">${item.finding}</div>
-            ${item.correction ? `<div class="verify-item-correction ${
-              item.status === 'UPDATED' ? 'correction-update' :
-              item.status === 'FLAGGED' ? 'correction-missing' : 'correction-confirm'
-            }">${item.correction}</div>` : ''}
-          </div>
-          <div class="verify-badge badge-${item.status.toLowerCase()}">${item.status}</div>
-        </div>`).join('')}
-
-      ${(result.missingPermits || []).map(mp => `
-        <div class="verify-item" style="background:rgba(91,173,255,0.04);">
-          <div class="verify-icon" style="color:var(--sky)">+</div>
-          <div class="verify-item-body">
-            <div class="verify-item-permit" style="color:var(--sky)">${mp.name}</div>
-            <div class="verify-item-finding">${mp.agency}</div>
-            <div class="verify-item-correction correction-confirm">${mp.reason}</div>
-          </div>
-          <div class="verify-badge" style="background:rgba(91,173,255,0.1);color:var(--sky);border:1px solid rgba(91,173,255,.2);">MISSING</div>
-        </div>`).join('')}
-    </div>`;
-
-  // If there are updates or missing permits, apply visual flags to the checklist items
-  if (result.items) {
-    result.items.forEach(item => {
-      if (item.status === 'UPDATED' || item.status === 'FLAGGED') {
-        // Try to find the matching permit row by name substring
-        const allRows = document.querySelectorAll('.permit-check-item .pci-name');
-        allRows.forEach(nameEl => {
-          if (nameEl.textContent.includes(item.permitName.substring(0, 20))) {
-            const row = nameEl.closest('.permit-check-item');
-            if (row) {
-              row.style.borderColor = item.status === 'FLAGGED' ? 'rgba(124,111,247,0.5)' : 'rgba(245,166,35,0.5)';
-              const flagBadge = document.createElement('div');
-              flagBadge.style.cssText = `font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;margin-top:4px;display:inline-block;background:${item.status === 'FLAGGED' ? 'var(--red-dim)' : 'var(--amber-dim)'};color:${item.status === 'FLAGGED' ? 'var(--fervo2)' : 'var(--amber)'};border:1px solid ${item.status === 'FLAGGED' ? 'rgba(124,111,247,.3)' : 'rgba(245,166,35,.3)'};`;
-              flagBadge.textContent = item.status === 'FLAGGED' ? '✗ FLAGGED BY VERIFIER' : '⚠ UPDATED BY VERIFIER';
-              const info = row.querySelector('.pci-info');
-              if (info && !info.querySelector('.verifier-flag')) {
-                flagBadge.className += ' verifier-flag';
-                info.appendChild(flagBadge);
-              }
-            }
-          }
-        });
-      }
-    });
-  }
-}
 
 
 
