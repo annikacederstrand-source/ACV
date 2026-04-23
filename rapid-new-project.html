@@ -1275,17 +1275,94 @@ const STATE_PERMITS = {
 
   // Colorado permits are already defined in the main ALL_PERMITS array in this file
   // but we include a minimal reference here so state lookup works correctly
-  Colorado: [], // handled via CO-specific dedicated database in the demo
+  Colorado: [
+    {
+      id:'co_rmp', phase:'exploration', type:'federal', icon:'🗺️',
+      name:'BLM RMP Conformance — Colorado Field Offices',
+      agency:'BLM — Colorado State Office (Grand Junction, White River, Royal Gorge FOs)',
+      form:'Internal BLM review — no standard form',
+      citation:'43 CFR Part 1600; 2008 ROD (PGEIS)',
+      timeline:'1–3 months',
+      nepa:'Covered by 2008 PGEIS if within ROD area',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Colorado/Land_Use',
+      description:'Confirm the project parcel is within the 2008 ROD area before lease nomination. Colorado BLM Field Offices: Grand Junction, White River, Royal Gorge. Most western Colorado parcels are within the 2008 ROD area and do not require RMP amendment.',
+      requirements:['Identify applicable CO BLM Field Office','Confirm parcel is within 2008 ROD area','Review for Colorado-specific stipulations (sage-grouse protections, water quality)'],
+    },
+    {
+      id:'co_cdwr', phase:'drilling', type:'state', icon:'💧',
+      name:'CDWR Geothermal Fluid Use Permit / Water Court Decree',
+      agency:'Colorado Division of Water Resources (CDWR) — State Engineer\'s Office',
+      form:'Form GWS-45; Colorado Water Court Application (if tributary)',
+      citation:'C.R.S. § 37-90.5-107; 2 CCR 402-10; C.R.S. § 37-92 (Water Court)',
+      timeline:'6 months–3 years (water court adjudication if tributary)',
+      nepa:'State process',
+      critical:true, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Colorado/Water_Access_%26_Rights',
+      description:'Colorado prior appropriation doctrine governs all water. A CDWR Use Permit is required unless the operation is fully closed-loop and nonconsumptive. If the fluid is tributary groundwater (Colorado\'s default), a formal water court decree is required — potentially adding 1–3 years. This is the single highest-risk item for any Colorado project timeline.',
+      requirements:['Submit Form GWS-45 to CDWR — well location, depth, use type','CDWR determines tributary vs. nontributary (all water presumed tributary unless designated)','If tributary: water right adjudicated in Water Court (C.R.S. § 37-92) — can take 1–3 years','Closed-loop EGS: apply to CDWR for nonconsumptive use waiver','ECMC Operations Permit cannot issue until water rights are resolved'],
+      waterNote:'🚨 HIGHEST RISK: Water court adjudication can take 1–3 years. Begin CDWR consultation before any other permits.',
+    },
+    {
+      id:'co_ecmc', phase:'drilling', type:'state', icon:'🏛️',
+      name:'Colorado ECMC Geothermal Operations Permit (Deep >2,500 ft)',
+      agency:'Colorado Energy and Carbon Management Commission (ECMC)',
+      form:'Form GWS-45 / ECMC 1300 Series Rules',
+      citation:'C.R.S. § 37-90.5-106(1)(b)(I); 2 CCR 402-10:6; ECMC Rule 1300',
+      timeline:'3–6 months (after water rights secured)',
+      nepa:'ECMC environmental review; mandatory public comment',
+      critical:true, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Colorado/Drilling_%26_Well_Development',
+      description:'ECMC issues Operations Permits for deep geothermal operations (>2,500 ft or nontributary groundwater). Cannot issue until water rights are secured. Requires mandatory community notification, adjacent landowner notice, and public comment. ECMC and CDWR coordinate review.',
+      requirements:['Water rights must be secured before ECMC issues Operations Permit','Submit application with well location, depth, casing design, fluid disposal plan','Mandatory notification to surface owners, adjacent landowners, local government','ECMC public comment period; formal hearing if objections received'],
+      waterNote:'⚠️ Sequential dependency: ECMC permit cannot issue until CDWR water rights resolved.',
+    },
+    {
+      id:'co_uic', phase:'construction', type:'env', icon:'🔄',
+      name:'EPA Region 8 — Class V UIC Permit (Injection Wells)',
+      agency:'U.S. Environmental Protection Agency — Region 8 (Denver)',
+      form:'EPA Class V UIC Permit Application — EPA Region 8 (Denver)',
+      citation:'40 C.F.R. §§ 144.6(e), 144.81(11); Safe Drinking Water Act',
+      timeline:'6–18 months',
+      nepa:'Federal permit triggers NEPA review',
+      critical:false, waterFlag:true,
+      rapidUrl:'https://openei.org/wiki/RAPID/Roadmap/14-CO-c',
+      description:'Colorado does NOT have EPA primacy for Class V UIC — unlike Nevada, Utah, Oregon, and California. Apply to EPA Region 8 (Denver) directly. This is a common mistake — do not apply to CDPHE for this permit.',
+      requirements:['Apply to EPA Region 8 (Denver) — NOT to CDPHE','Well construction design; MIT before injection begins','Groundwater monitoring; annual reporting to EPA Region 8'],
+      waterNote:'⚠️ Colorado is the only state in the 5-state region without UIC primacy. Apply to EPA Region 8, not the state.',
+    },
+    {
+      id:'co_air', phase:'construction', type:'env', icon:'💨',
+      name:'Colorado CDPHE APCD — Air Quality Construction Permit',
+      agency:'Colorado CDPHE — Air Pollution Control Division (APCD)',
+      form:'Air Permit Application — CDPHE APCD',
+      citation:'C.R.S. § 25-7; 40 CFR Parts 51–52',
+      timeline:'3–12 months',
+      nepa:'Addressed in BLM EA/EIS',
+      critical:false, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Roadmap/15-CO-a',
+      description:'Required before constructing or operating stationary air emission sources. CDPHE APCD contact: 303-692-3100. Sources include drilling rigs, power plant turbines, H₂S abatement systems. Title V permit required if major-source thresholds exceeded.',
+      requirements:['Apply to CDPHE APCD (303-692-3100)','Quantify NOx, PM10, PM2.5, VOCs, H₂S','H₂S abatement required for flash steam plants; binary cycle emits far less','Title V Operating Permit if >100 tons/yr of any criteria pollutant'],
+    },
+    {
+      id:'co_cpuc', phase:'utilization', type:'state', icon:'🏭',
+      name:'Colorado Public Utilities Commission — CPCN',
+      agency:'Colorado Public Utilities Commission (CPUC)',
+      form:'CPCN Application — Colorado PUC',
+      citation:'C.R.S. § 40-5-101; 4 CCR 723-3-3205',
+      timeline:'12–24 months',
+      nepa:'State PUC environmental review',
+      critical:true, waterFlag:false,
+      rapidUrl:'https://openei.org/wiki/RAPID/Geothermal/Colorado/Power_Plant',
+      description:'Required for geothermal power plants >10 MW qualifying as a public utility under C.R.S. § 40-1-103. Rural electric cooperative projects within their certificated area are exempt. CPUC confirms project need and cost appropriateness.',
+      requirements:['File CPCN application with Colorado PUC','CPUC public intervenor process; utilities and consumer advocates may participate','Coordinate with BLM POU EIS timeline','Rural electric cooperative exemption may apply'],
+    },
+  ],
 };
 
 // Build the full permit list for a given state (federal + state-specific)
 function getPermitsForState(state) {
   const statePerms = STATE_PERMITS[state] || [];
-  // For Colorado the full detailed DB is loaded separately; for other states combine federal + state
-  if (state === 'Colorado') {
-    // Return the Colorado-specific ALL_PERMITS defined elsewhere
-    return typeof CO_PERMITS !== 'undefined' ? CO_PERMITS : [...FEDERAL_PERMITS, ...statePerms];
-  }
   return [...FEDERAL_PERMITS, ...statePerms];
 }
 
@@ -1369,31 +1446,43 @@ window.addEventListener('DOMContentLoaded', () => {
 // ═══════════════════════════════════════
 // STORAGE HELPERS
 // ═══════════════════════════════════════
-const STORAGE_PREFIX = 'project:';
+const STORAGE_PREFIX = 'geopermit:project:';
 
 async function getAllProjects() {
   try {
     const projects = [];
-    for (let i = 0; i < localStorage.length; i++) {
-      const key = localStorage.key(i);
-      if (key && key.startsWith(STORAGE_PREFIX)) {
-        try {
-          const val = localStorage.getItem(key);
-          if (val) projects.push(JSON.parse(val));
-        } catch(e) { /* skip corrupt entries */ }
-      }
+    // Use Object.keys on localStorage rather than index iteration (more reliable)
+    const keys = Object.keys(localStorage).filter(k => k.startsWith(STORAGE_PREFIX));
+    for (const key of keys) {
+      try {
+        const val = localStorage.getItem(key);
+        if (val) projects.push(JSON.parse(val));
+      } catch(e) { /* skip corrupt entry */ }
     }
     return projects.sort((a, b) => b.savedAt - a.savedAt);
-  } catch(e) { return []; }
+  } catch(e) {
+    console.warn('getAllProjects failed:', e);
+    return [];
+  }
 }
 
 async function saveProject(project) {
-  const key = STORAGE_PREFIX + project.id;
-  localStorage.setItem(key, JSON.stringify(project));
+  try {
+    const key = STORAGE_PREFIX + project.id;
+    localStorage.setItem(key, JSON.stringify(project));
+    return true;
+  } catch(e) {
+    console.error('saveProject failed:', e);
+    // localStorage full or blocked (private browsing)
+    showToast('⚠ Save failed — storage may be full or blocked');
+    return false;
+  }
 }
 
 async function deleteProject(id) {
-  localStorage.removeItem(STORAGE_PREFIX + id);
+  try {
+    localStorage.removeItem(STORAGE_PREFIX + id);
+  } catch(e) { console.warn('deleteProject failed:', e); }
 }
 
 function showToast(msg) {
@@ -1499,39 +1588,50 @@ async function loadProject(id) {
 // SAVE CURRENT PROJECT
 // ═══════════════════════════════════════
 async function saveCurrentProject() {
-  if (!currentConfig || !currentPermits.length) return;
-
-  // Collect completed permit IDs from current DOM
-  const completed = [];
-  currentPermits.forEach(p => {
-    const el = document.getElementById('pci-' + p.id);
-    if (el && el.classList.contains('completed')) completed.push(p.id);
-  });
-
-  const id = currentProjectId || ('proj_' + Date.now());
-  currentProjectId = id;
-
-  const project = {
-    id,
-    config:    currentConfig,
-    permits:   currentPermits,
-    narrative: currentNarrative,
-    flags:     Array.from(document.querySelectorAll('.check-row.checked .check-label')).map(el => el.textContent),
-    completed,
-    savedAt:   Date.now(),
-  };
-
-  await saveProject(project);
-  await refreshProjectsList(); // update badge count
-
-  // Update save button state
-  const btn = document.getElementById('btnSaveProject');
-  if (btn) {
-    btn.classList.add('saved');
-    btn.textContent = '✓ Saved';
+  if (!currentConfig || !currentPermits.length) {
+    showToast('⚠ Generate a checklist first before saving');
+    return;
   }
 
-  showToast('✓ Project saved');
+  const btn = document.getElementById('btnSaveProject');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+
+  try {
+    const completed = [];
+    currentPermits.forEach(p => {
+      const el = document.getElementById('pci-' + p.id);
+      if (el && el.classList.contains('completed')) completed.push(p.id);
+    });
+
+    const id = currentProjectId || ('proj_' + Date.now());
+    currentProjectId = id;
+
+    const project = {
+      id,
+      config:    currentConfig,
+      permits:   currentPermits,
+      narrative: currentNarrative,
+      flags:     Array.from(document.querySelectorAll('.check-row.checked .check-label')).map(el => el.textContent),
+      completed,
+      savedAt:   Date.now(),
+    };
+
+    const ok = await saveProject(project);
+    if (!ok) {
+      if (btn) { btn.disabled = false; btn.textContent = '💾 Save Project'; }
+      return;
+    }
+
+    await refreshProjectsList();
+
+    if (btn) { btn.classList.add('saved'); btn.textContent = '✓ Saved'; }
+    showToast('✓ Project saved');
+
+  } catch(e) {
+    console.error('saveCurrentProject error:', e);
+    showToast('⚠ Save error: ' + e.message);
+    if (btn) { btn.disabled = false; btn.textContent = '💾 Save Project'; }
+  }
 }
 
 // ═══════════════════════════════════════
@@ -1910,33 +2010,6 @@ function renderVerification(result, config, permits) {
 }
 
 
-  // Show verification panel in "running" state
-  const verifyEl = document.getElementById('verifyPanel');
-  if (!verifyEl) return;
-
-  verifyEl.innerHTML = `
-    <div class="verify-header">
-      <div class="verify-header-left">
-        <span style="font-size:16px">🔍</span>
-        <span class="verify-title">Permit Verification Agent</span>
-        <span class="verify-status running">Checking RAPID Toolkit…</span>
-      </div>
-    </div>
-    <div class="verify-skel">
-      ${[1,2,3].map(() => `
-        <div style="display:flex;gap:10px;align-items:flex-start">
-          <div class="skel" style="width:18px;height:18px;border-radius:50%;flex-shrink:0;margin-top:2px"></div>
-          <div style="flex:1">
-            <div class="skel skel-line" style="width:55%;height:11px;margin-bottom:5px"></div>
-            <div class="skel skel-line" style="width:85%;height:10px"></div>
-          </div>
-        </div>`).join('')}
-    </div>`;
-
-
-
-
-
 // ═══════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════
@@ -2071,7 +2144,7 @@ function renderResults(config, permits, narrative, flags, completed = [], projec
               <div class="pci-info">
                 <div class="pci-name">${p.critical ? '⚡ ' : ''}${p.waterFlag ? '💧 ' : ''}${p.name}</div>
                 <div class="pci-agency">${p.agency}</div>
-                <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:2px;">${p.form} · ${p.citation}</div>
+                <div style="font-family:var(--mono);font-size:9px;color:var(--text-faint);margin-top:2px;">${p.form}${p.citation ? ' · ' + p.citation : p.cfr ? ' · ' + p.cfr : ''}</div>
                 ${p.waterNote ? `<div style="font-family:var(--mono);font-size:10px;color:var(--sky);margin-top:5px;line-height:1.4;">${p.waterNote}</div>` : ''}
                 ${p.deadline2028 ? `<div style="font-family:var(--mono);font-size:9px;color:var(--amber);margin-top:4px;">🗓 ${p.deadline2028}</div>` : ''}
               </div>
